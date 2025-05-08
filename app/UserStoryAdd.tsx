@@ -1,9 +1,10 @@
-// app/StoryAddScreen.tsx
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
+import { addDoc, collection } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebaseConfig'; // make sure the path is correct
 
 const StoryAddScreen = () => {
   const navigation = useNavigation();
@@ -25,21 +26,39 @@ const StoryAddScreen = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!title || !description || !location || !storyType) {
       alert('Please fill in all required fields.');
       return;
     }
-    // Here you would send the story to Firebase Firestore
-    console.log({
-      title,
-      description,
-      location,
-      storyType,
-      image,
-    });
-    alert('Story submitted for moderation!');
-    navigation.goBack(); // return to previous screen
+  
+    const auth = getAuth();
+    const user = auth.currentUser;
+  
+    if (!user) {
+      alert('You must be logged in to submit a story.');
+      return;
+    }
+  
+    try {
+      await addDoc(collection(db, 'legends'), {
+        title,
+        description,
+        location,
+        category: storyType,
+        image: image || '',
+        latitude: 0, // placeholder for now
+        longitude: 0,
+        userId: user.uid, // ✅ user ID added safely
+        createdAt: new Date(),
+      });
+  
+      alert('Story submitted for moderation!');
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error submitting story:', error);
+      alert('Something went wrong. Please try again.');
+    }
   };
 
   return (
@@ -107,6 +126,7 @@ const StoryAddScreen = () => {
 };
 
 export default StoryAddScreen;
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },

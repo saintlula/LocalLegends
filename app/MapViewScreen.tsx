@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from 'react-native';
+import MapView, { Marker, Region } from 'react-native-maps';
 import { useRouter } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export default function MapViewScreen() {
   const [legends, setLegends] = useState<any[]>([]);
+  const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,6 +22,16 @@ export default function MapViewScreen() {
         fetchedLegends.push({ id: doc.id, ...doc.data() });
       });
       setLegends(fetchedLegends);
+
+      if (fetchedLegends.length > 0) {
+        const first = fetchedLegends[0].location;
+        setInitialRegion({
+          latitude: first.latitude,
+          longitude: first.longitude,
+          latitudeDelta: 0.1,
+          longitudeDelta: 0.1,
+        });
+      }
     } catch (error) {
       console.error('Error fetching legends:', error);
     }
@@ -29,37 +40,32 @@ export default function MapViewScreen() {
   const handleMarkerPress = (legendId: string) => {
     router.push({
       pathname: '/StoryDetails',
-      params: { storyId: legendId },
+      params: { id: legendId },
     });
   };
 
   return (
     <View style={styles.container}>
-      <MapView
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: 39.9334,
-          longitude: 32.8597,
-          latitudeDelta: 0.1,
-          longitudeDelta: 0.1,
-        }}
-      >
-        {legends.map((legend) => (
-          <Marker
-            key={legend.id}
-            coordinate={{
-              latitude: legend.latitude,
-              longitude: legend.longitude,
-            }}
-            title={legend.title}
-            description={legend.description}
-            pinColor={legend.hiddenGem ? 'blue' : 'red'} // Hidden Gems blue
-            onPress={() => handleMarkerPress(legend.id)}
-          />
-        ))}
-      </MapView>
+      {initialRegion ? (
+        <MapView style={StyleSheet.absoluteFillObject} initialRegion={initialRegion}>
+          {legends.map((legend) => (
+            <Marker
+              key={legend.id}
+              coordinate={{
+                latitude: legend.location.latitude,
+                longitude: legend.location.longitude,
+              }}
+              title={legend.title}
+              description={legend.description}
+              pinColor={legend.hiddenGem ? 'blue' : 'red'}
+              onPress={() => handleMarkerPress(legend.id)}
+            />
+          ))}
+        </MapView>
+      ) : (
+        <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 100 }} />
+      )}
 
-      {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Text style={styles.backButtonText}>⬅ Back to Home</Text>
       </TouchableOpacity>

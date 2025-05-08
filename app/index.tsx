@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, useColorScheme } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, TouchableWithoutFeedback,Keyboard  } from 'react-native';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig'; // adjust path if needed
-import { Colors } from '@/constants/Colors';
-import { DarkTheme } from '@react-navigation/native';
+import { auth } from '../firebaseConfig';
+import useCustomFonts from '../hooks/useCustomFont';
 
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+
+  const fontsLoaded = useCustomFonts();
+  if (!fontsLoaded) return null;
 
   const handleLogin = async () => {
     if (username === 'admin' && password === 'admin') {
@@ -58,107 +60,140 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome to</Text>
-      <Text style={styles.logo}>Local Legends</Text>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Welcome to</Text>
+        <Text style={styles.logo}>Local Legends</Text>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Email"
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Email"
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+          />
+          <TextInput
+            placeholder="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            style={styles.input}
+          />
+        </View>
+
+        <TouchableOpacity onPress={handleLogin} style={styles.button}>
+          <Text style={styles.buttonText}>Log In</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleGuestLogin}>
+          <Text style={styles.guestText}>Or enter as a guest!</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
+          <Text style={styles.signupText}>Or... Sign up!</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleHelp} style={styles.helpContainer}>
+          <Text style={styles.helpText}>Not sure how this works?</Text>
+        </TouchableOpacity>
       </View>
-
-      <TouchableOpacity onPress={handleLogin} style={styles.button}>
-        <Text style={styles.buttonText}>Log In</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleGuestLogin}>
-        <Text style={styles.guestText}>Or enter as a guest!</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
-        <Text style={styles.signupText}>Or... Sign up!</Text>
-      </TouchableOpacity>
-
-
-      <TouchableOpacity onPress={handleHelp} style={styles.helpContainer}>
-        <Text style={styles.helpText}>Not sure how this works?</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#e8e5e5',
+    backgroundColor: '#121212',
     padding: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '300',
-    marginBottom: 8,
+    fontSize: 30,
+    color: '#fefefe',
+    marginBottom: 4,
+    fontFamily: 'SpaceMono',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
   logo: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#3b6e82',
+    fontSize: 54,
+    color: '#f8d06f',
+    marginBottom: 32,
+    fontFamily: 'SpaceMono',
+    textShadowColor: '#000',
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 6,
   },
   inputContainer: {
     width: '100%',
-    marginBottom: 20,
+    backgroundColor: '#1f1f1f',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+    borderColor: '#333',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 8,
+    borderColor: '#444',
+    borderRadius: 10,
     padding: 12,
-    marginBottom: 10,
-    backgroundColor: '#fff',
+    marginBottom: 14,
+    backgroundColor: '#2c2c2c',
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'SpaceMono',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
   button: {
-    backgroundColor: '#3b6e82',
+    backgroundColor: '#f8d06f',
     padding: 14,
-    borderRadius: 10,
-    marginBottom: 12,
+    borderRadius: 12,
+    marginBottom: 16,
     width: '100%',
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#b69c53',
   },
   buttonText: {
-    color: '#fff',
+    color: '#1a1a1a',
     textAlign: 'center',
     fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: 'SpaceMono',
   },
   guestText: {
-    color: '#333',
-    fontSize: 16,
+    color: '#f8d06f',
+    fontSize: 15,
     textDecorationLine: 'underline',
+    fontFamily: 'SpaceMono',
+  },
+  signupText: {
+    color: '#f8d06f',
+    fontSize: 15,
+    textDecorationLine: 'underline',
+    marginTop: 10,
+    fontFamily: 'SpaceMono',
   },
   helpContainer: {
     marginTop: 40,
   },
   helpText: {
-    color: '#555',
-    fontSize: 14,
+    color: '#999',
+    fontSize: 13,
+    fontFamily: 'SpaceMono',
   },
-
-  signupText: {
-    color: '#333',
-    fontSize: 16,
-    textDecorationLine: 'underline',
-    marginTop: 10,
-  },
-  
 });

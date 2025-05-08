@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -19,7 +26,18 @@ export default function ListViewScreen() {
       const querySnapshot = await getDocs(collection(db, 'legends'));
       const fetchedLegends: any[] = [];
       querySnapshot.forEach((doc) => {
-        fetchedLegends.push({ id: doc.id, ...doc.data() });
+        const data = doc.data();
+        const geo = data.location;
+
+        const latitude = geo?.latitude ?? geo?._lat;
+        const longitude = geo?.longitude ?? geo?._long;
+
+        fetchedLegends.push({
+          id: doc.id,
+          ...data,
+          latitude,
+          longitude,
+        });
       });
       setLegends(fetchedLegends);
     } catch (error) {
@@ -37,7 +55,11 @@ export default function ListViewScreen() {
   const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity style={styles.item} onPress={() => handleLegendPress(item.id)}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.location}</Text>
+      {item.latitude && item.longitude && (
+        <Text style={styles.description}>
+          Location: {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
+        </Text>
+      )}
       {item.hiddenGem && <Text style={styles.hiddenGem}>💎 Hidden Gem</Text>}
     </TouchableOpacity>
   );

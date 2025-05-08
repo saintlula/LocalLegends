@@ -1,11 +1,9 @@
-// app/StoryDetailsScreen.tsx
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, FlatList, SafeAreaView, TouchableOpacity } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { doc, getDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-import { Ionicons } from '@expo/vector-icons'; // for icons like diamonds, back button
+import { Ionicons } from '@expo/vector-icons';
 
 const StoryDetailsScreen = () => {
   const route = useRoute();
@@ -65,12 +63,10 @@ const StoryDetailsScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* BACK BUTTON */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={28} color="black" />
       </TouchableOpacity>
 
-      {/* HEADER CARD */}
       <View style={styles.headerCard}>
         <Text style={styles.title}>{legend.title}</Text>
         <Text style={styles.subtitle}>
@@ -78,11 +74,14 @@ const StoryDetailsScreen = () => {
         </Text>
       </View>
 
-      {/* INFO CARDS */}
       <View style={styles.infoSection}>
         <View style={styles.infoCard}>
           <Text style={styles.infoLabel}>Location:</Text>
-          <Text>{legend.location}</Text>
+          <Text>
+            {typeof legend.location === 'string'
+              ? legend.location
+              : `Lat: ${legend.location.latitude.toFixed(4)}, Lng: ${legend.location.longitude.toFixed(4)}`}
+          </Text>
         </View>
         <View style={[styles.infoCard, { backgroundColor: '#f9f9f9' }]}>
           <Text style={styles.infoLabel}>Author:</Text>
@@ -90,13 +89,11 @@ const StoryDetailsScreen = () => {
         </View>
       </View>
 
-      {/* STORY DESCRIPTION */}
       <View style={styles.descriptionCard}>
         <Text style={styles.infoLabel}>Story Description:</Text>
         <Text>{legend.description}</Text>
       </View>
 
-      {/* USER REVIEWS */}
       <View style={styles.reviewsSection}>
         <Text style={styles.infoLabel}>User Reviews:</Text>
         <FlatList
@@ -112,7 +109,6 @@ const StoryDetailsScreen = () => {
         />
       </View>
 
-      {/* ADD REVIEW */}
       <View style={styles.addReviewSection}>
         <TextInput
           style={styles.input}
