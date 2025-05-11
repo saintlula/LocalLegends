@@ -1,6 +1,6 @@
 // hooks/useLegends.ts
 import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, GeoPoint, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export interface Legend {
@@ -10,7 +10,8 @@ export interface Legend {
   category: string;
   latitude: number;
   longitude: number;
-  location: string;
+  location: GeoPoint;
+  locationName: string;
   distance?: number;
 }
 

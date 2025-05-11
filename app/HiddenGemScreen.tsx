@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, StyleSheet, Alert } from 'react-native';
-import { getDocs, collection } from 'firebase/firestore';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, Alert, Dimensions } from 'react-native';
+import { getDocs, collection, GeoPoint } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
+import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { getAuth } from 'firebase/auth';
 
 type Gem = {
   id: string;
@@ -17,9 +17,9 @@ type Gem = {
 const HiddenGemScreen = () => {
   const [gems, setGems] = useState<Gem[]>([]);
   const [filteredGems, setFilteredGems] = useState<Gem[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [isPremium, setIsPremium] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<'scenic' | 'bar' | 'other' | 'all'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
     const R = 6371;
@@ -35,14 +35,6 @@ const HiddenGemScreen = () => {
     return R * c;
   };
 
-  const fetchUserStatus = async () => {
-    const user = getAuth().currentUser;
-    if (user) {
-      const token = await user.getIdTokenResult();
-      setIsPremium(!!token.claims.isPremium);
-    }
-  };
-
   const fetchGems = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, 'legendsWgem'));
@@ -50,109 +42,157 @@ const HiddenGemScreen = () => {
 
       querySnapshot.forEach(doc => {
         const data = doc.data();
-        if (!data.location) return;
+        const location = data.location;
+
+        if (!(location instanceof GeoPoint)) {
+          console.warn('Invalid GeoPoint:', doc.id, location);
+          return;
+        }
 
         loadedGems.push({
           id: doc.id,
-          title: data.title,
-          description: data.description,
-          category: data.category,
-          latitude: data.location.latitude,
-          longitude: data.location.longitude,
+          title: data.title || 'No title',
+          description: data.description || 'No description',
+          category: data.category || 'other',
+          latitude: location.latitude,
+          longitude: location.longitude,
         });
       });
 
+      console.log('✅ All fetched gems:', loadedGems);
       setGems(loadedGems);
     } catch (error) {
-      console.error('Error fetching hidden gems:', error);
+      console.error('❌ Error fetching gems:', error);
     }
   };
 
   const requestLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Location permission is required to use this feature.');
-      return;
-    }
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      console.log('📍 Permission status:', status);
 
-    let location = await Location.getCurrentPositionAsync({});
-    setUserLocation({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    });
+      if (status !== 'granted') {
+        Alert.alert('Location Required', 'Please allow location access to view nearby gems.');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      console.log('📍 Location obtained:', location.coords);
+
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    } catch (error) {
+      console.error('❌ Error getting location:', error);
+    }
   };
 
   useEffect(() => {
-    fetchUserStatus();
     fetchGems();
     requestLocation();
+
+    // Temporary fallback for testing if location doesn't work
+    setTimeout(() => {
+      if (!userLocation) {
+        console.log('🧪 Setting fallback location...');
+        setUserLocation({ latitude: -37.81, longitude: 144.96 });
+      }
+    }, 3000); // fallback after 3 seconds
   }, []);
 
   useEffect(() => {
-    if (userLocation) {
-      const nearby = gems.filter(gem => {
-        const dist = getDistance(userLocation.latitude, userLocation.longitude, gem.latitude, gem.longitude);
-        return dist <= 50;
-      });
-      setFilteredGems(nearby);
+    if (!userLocation) {
+      console.log('ℹ️ Skipping distance filtering: user location not available yet.');
+      return;
     }
-  }, [gems, userLocation]);
 
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredGems(gems);
-    } else {
-      setFilteredGems(
-        gems.filter(gem =>
-          gem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          gem.description.toLowerCase().includes(searchQuery.toLowerCase())
-        )
+    let results = gems;
+
+    results = results.filter(gem => {
+      const distance = getDistance(userLocation.latitude, userLocation.longitude, gem.latitude, gem.longitude);
+      return distance <= 50;
+    });
+
+    if (selectedCategory !== 'all') {
+      results = results.filter(g => g.category === selectedCategory);
+    }
+
+    if (searchQuery.trim() !== '') {
+      results = results.filter(g =>
+        g.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        g.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
-  }, [searchQuery]);
 
-  const renderGem = (category: 'scenic' | 'bar' | 'other') => {
-    return (
-      <View style={styles.categoryBlock}>
-        <Text style={styles.categoryTitle}>{category.toUpperCase()}</Text>
-        {filteredGems.filter(g => g.category === category).map(gem => {
-          const distance = userLocation
-            ? getDistance(userLocation.latitude, userLocation.longitude, gem.latitude, gem.longitude).toFixed(1)
-            : '?';
-          return (
-            <View key={gem.id} style={styles.card}>
-              <Text style={styles.title}>{gem.title}</Text>
-              <Text style={styles.desc}>{gem.description}</Text>
-              <Text style={styles.distance}>Distance: {distance} km</Text>
-            </View>
-          );
-        })}
-      </View>
-    );
-  };
+    setFilteredGems(results);
+  }, [gems, userLocation, selectedCategory, searchQuery]);
 
-  if (!isPremium) {
-    return (
-      <View style={styles.center}>
-        <Text style={styles.notPremiumText}>🚫 This feature is only available for premium users.</Text>
-      </View>
-    );
-  }
+  const categoryButtons = ['all', 'scenic', 'bar', 'other'];
 
   return (
     <View style={styles.container}>
+      {userLocation && (
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: userLocation?.latitude ?? -37.8136, 
+            longitude: userLocation?.longitude ?? 144.9631,
+            latitudeDelta: 0.1,
+            longitudeDelta: 0.1,
+          }}
+        >
+          {filteredGems.map(gem => (
+            <Marker
+              key={gem.id}
+              coordinate={{ latitude: gem.latitude, longitude: gem.longitude }}
+              title={gem.title}
+              description={gem.description}
+            />
+          ))}
+        </MapView>
+      )}
+
       <TextInput
-        placeholder="Search hidden gems..."
-        style={styles.searchInput}
+        style={styles.search}
+        placeholder="Search gems..."
+        placeholderTextColor="#ccc"
         value={searchQuery}
         onChangeText={setSearchQuery}
-        placeholderTextColor="#888"
       />
 
+      <View style={styles.categoryBar}>
+        {categoryButtons.map(cat => (
+          <TouchableOpacity
+            key={cat}
+            style={[
+              styles.categoryBtn,
+              selectedCategory === cat ? styles.activeCategory : null,
+            ]}
+            onPress={() => setSelectedCategory(cat as any)}
+          >
+            <Text style={styles.categoryText}>{cat.toUpperCase()}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={['scenic', 'bar', 'other']}
-        keyExtractor={item => item}
-        renderItem={({ item }) => renderGem(item as Gem['category'])}
+        data={filteredGems}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          const distance = userLocation
+            ? getDistance(userLocation.latitude, userLocation.longitude, item.latitude, item.longitude).toFixed(1)
+            : '?';
+
+          return (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardDesc}>{item.description}</Text>
+              <Text style={styles.cardDistance}>📍 {distance} km away</Text>
+            </View>
+          );
+        }}
+        ListEmptyComponent={<Text style={styles.noResults}>No gems found nearby.</Text>}
       />
     </View>
   );
@@ -161,25 +201,74 @@ const HiddenGemScreen = () => {
 export default HiddenGemScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#121212' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  notPremiumText: { color: '#fff', fontSize: 18, textAlign: 'center' },
-  searchInput: {
+  container: { flex: 1, backgroundColor: '#0e0e0e' },
+  map: { width: '100%', height: Dimensions.get('window').height * 0.3, borderRadius: 12, marginBottom: 16,    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 5, },
+  search: {
     backgroundColor: '#1e1e1e',
-    padding: 10,
-    borderRadius: 8,
     color: '#fff',
-    marginBottom: 16,
+    margin: 10,
+    padding: 12,
+    borderRadius: 10,
+    fontSize: 16,
   },
-  categoryBlock: { marginBottom: 24 },
-  categoryTitle: { fontSize: 20, color: '#facc15', marginBottom: 8 },
+  categoryBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  categoryBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 25,
+    backgroundColor: '#333',
+    marginHorizontal: 5,
+  },
+  activeCategory: {
+    backgroundColor: '#facc15',
+  },
+  categoryText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   card: {
     backgroundColor: '#1f2937',
-    padding: 12,
-    borderRadius: 12,
+    marginHorizontal: 12,
     marginBottom: 10,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.9,
+    shadowRadius: 5,
+    elevation: 0,
   },
-  title: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
-  desc: { color: '#cbd5e1' },
-  distance: { marginTop: 4, color: '#a3e635' },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  cardDesc: {
+    color: '#d1d5db',
+    marginTop: 6,
+    fontSize: 14,
+  },
+  cardDistance: {
+    marginTop: 6,
+    color: '#86efac',
+    fontSize: 14,
+  },
+  noResults: {
+    color: '#ccc',
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+  },
 });

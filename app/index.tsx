@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, TouchableWithoutFeedback,Keyboard  } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
@@ -14,7 +14,8 @@ export default function LoginScreen() {
   if (!fontsLoaded) return null;
 
   const handleLogin = async () => {
-    if (username === 'admin' && password === 'admin') {
+    if (username === 'admin@gmail.com' && password === 'adminll') {
+      // User is the admin, so we set premium to true
       router.push({
         pathname: '/HomeScreen',
         params: {
@@ -27,15 +28,30 @@ export default function LoginScreen() {
     }
 
     try {
+      // Regular user login with Firebase Authentication
       await signInWithEmailAndPassword(auth, username, password);
-      router.push({
-        pathname: '/HomeScreen',
-        params: {
-          username,
-          isGuest: 'false',
-          isPremium: 'false',
-        },
-      });
+
+      // Check if the logged-in user is admin
+      const user = auth.currentUser;
+      if (user && user.email === 'admin@gmail.com') {
+        router.push({
+          pathname: '/HomeScreen',
+          params: {
+            username: user.email,
+            isGuest: 'false',
+            isPremium: 'true',  // Admin is a premium user
+          },
+        });
+      } else {
+        router.push({
+          pathname: '/HomeScreen',
+          params: {
+            username: user ? user.email : username,
+            isGuest: 'false',
+            isPremium: 'false',  // Regular user, not premium
+          },
+        });
+      }
     } catch (error: any) {
       Alert.alert("Login failed", error.message);
     }
@@ -68,12 +84,14 @@ export default function LoginScreen() {
         <View style={styles.inputContainer}>
           <TextInput
             placeholder="Email"
+            placeholderTextColor="#888"
             value={username}
             onChangeText={setUsername}
             style={styles.input}
           />
           <TextInput
             placeholder="Password"
+            placeholderTextColor="#888"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -109,19 +127,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 30,
+    fontSize: 35,
     color: '#fefefe',
     marginBottom: 4,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Jacquard12-Regular',
     textShadowColor: '#000',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
   logo: {
-    fontSize: 54,
+    fontSize: 65,
     color: '#f8d06f',
     marginBottom: 32,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'Jacquard12-Regular',
     textShadowColor: '#000',
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
@@ -148,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#2c2c2c',
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'PixelifySans-Regular',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
@@ -173,20 +191,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'PixelifySans-Regular',
   },
   guestText: {
     color: '#f8d06f',
     fontSize: 15,
     textDecorationLine: 'underline',
-    fontFamily: 'SpaceMono',
+    fontFamily: 'PixelifySans-Regular',
   },
   signupText: {
     color: '#f8d06f',
     fontSize: 15,
     textDecorationLine: 'underline',
     marginTop: 10,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'PixelifySans-Regular',
   },
   helpContainer: {
     marginTop: 40,
@@ -194,6 +212,6 @@ const styles = StyleSheet.create({
   helpText: {
     color: '#999',
     fontSize: 13,
-    fontFamily: 'SpaceMono',
+    fontFamily: 'PixelifySans-Regular',
   },
 });

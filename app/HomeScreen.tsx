@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard, Animated, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLegends } from '../hooks/useLegends';
+import useCustomFont from '../hooks/useCustomFont'
 
 const categories = [
-  { name: 'Historical Events', emoji: '🏰' },
-  { name: 'Myths', emoji: '🧝‍♂️' },
-  { name: 'Urban Legends', emoji: '👻' }
+  { name: 'Historical Events'},
+  { name: 'Myths' },
+  { name: 'Urban Legends'}
 ];
 
 export default function HomeScreen() {
@@ -57,10 +58,9 @@ export default function HomeScreen() {
 
   const filteredLegends = legends.filter((legend) => {
     const query = searchQuery.toLowerCase();
-    return (
-      legend.title.toLowerCase().includes(query) ||
-      legend.location.toLowerCase().includes(query)
-    );
+    const title = typeof legend.title === 'string' ? legend.title.toLowerCase() : '';
+    const locationName = typeof legend.locationName === 'string' ? legend.locationName.toLowerCase() : '';
+    return title.includes(query) || locationName.includes(query);
   });
 
   return (
@@ -116,30 +116,29 @@ export default function HomeScreen() {
                 onPress={() => router.push({ pathname: '/StoryDetails', params: { id: legend.id } })}
               >
                 <Text style={styles.searchResultTitle}>{legend.title}</Text>
-                <Text style={styles.searchResultLocation}>{legend.location}</Text>
+                <Text style={styles.searchResultLocation}>{legend.locationName}</Text>
               </TouchableOpacity>
             ))}
           </View>
         )}
 
         <Text style={styles.sectionTitle}>Category Filter</Text>
-        <View style={styles.categoryContainer}>
-          {categories.map((cat) => (
-            <TouchableOpacity
-              key={cat.name}
-              style={styles.categoryButton}
-              onPress={() => handleCategoryPress(cat.name)}
-            >
-              <Text style={styles.categoryText}>{cat.emoji} {cat.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
+  <TouchableOpacity style={styles.categoryButton}>
+    <Text style={styles.categoryText}>Urban Legends</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.categoryButton}>
+    <Text style={styles.categoryText}>Historical Events</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.categoryButton}>
+    <Text style={styles.categoryText}>Myths</Text>
+  </TouchableOpacity>
+</ScrollView>
 
         <ImageBackground
           source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Old-world-map.jpg' }}
           style={styles.imageBackground}
         >
-          <View style={styles.overlay} />
         </ImageBackground>
 
         <TouchableOpacity style={styles.mapPreview} onPress={handleMapActivityPress}>
@@ -148,10 +147,10 @@ export default function HomeScreen() {
 
         <View style={styles.bottomButtons}>
           <TouchableOpacity style={styles.bottomButton} onPress={handleMapView}>
-            <Text style={styles.bottomButtonText}>🗺️ Map View</Text>
+            <Text style={styles.bottomButtonText}>Map View</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.bottomButton} onPress={handleListView}>
-            <Text style={styles.bottomButtonText}>📜 List of Local Legends</Text>
+            <Text style={styles.bottomButtonText}>List of Local Legends</Text>
           </TouchableOpacity>
         </View>
 
@@ -164,166 +163,203 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 20, paddingTop: 60 },
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#000', // pure black background
+    padding: 20,
+    paddingTop: 60,
+  },
   title: {
-    fontSize: 48,
-    fontWeight: 'bold',
+    fontSize: 50
+    ,
     color: '#f8d06f',
     textAlign: 'center',
     marginBottom: 10,
-    fontFamily: 'SpaceMono',
-    letterSpacing: 1.5,
+    fontFamily: 'Jacquard12-Regular',
+    letterSpacing: 1.0,
     textTransform: 'uppercase',
-    textShadowColor: '#000',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 4
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5, // soft yellow glow
   },
   userText: {
     fontSize: 20,
     textAlign: 'center',
     marginBottom: 5,
-    fontFamily: 'SpaceMono',
-    color: 'black'
+    fontFamily: 'Jacquard12-Regular',
+    color: '#f8d06f',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   badge: {
     alignSelf: 'center',
-    backgroundColor: '#FFD700',
+    backgroundColor: '#f8d06f',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
     marginBottom: 20,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
   },
-  badgeText: { color: '#000', fontWeight: 'bold' },
+  badgeText: { color: '#000', fontWeight: 'bold', fontFamily: 'PixelifySans-Regular' },
+
   searchInput: {
-    backgroundColor: '#ffffffcc',
+    backgroundColor: '#1a1a1a',
+    color: '#f8d06f',
     padding: 12,
     borderRadius: 10,
     marginBottom: 20,
-    fontFamily: 'SpaceMono',
-    shadowColor: '#f8d06f',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
+    fontFamily: 'PixelifySans-Regular',
+    borderWidth: 1,
+    borderColor: '#f8d06f',
   },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    fontFamily: 'SpaceMono',
-    color: '#f8d06f'
+    fontFamily: 'PixelifySans-Regular',
+    color: '#f8d06f',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
+
   categoryContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: 20,
+    paddingRight: 10,
   },
   categoryButton: {
     padding: 8,
-    backgroundColor: '#ffffffaa',
+    backgroundColor: '#1a1a1a',
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#f8d06f',
     shadowColor: '#f8d06f',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
   },
   categoryText: {
     fontSize: 16,
-    color: '#000',
-    fontFamily: 'SpaceMono',
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
   },
+
   mapPreview: {
     backgroundColor: '#f8d06f',
-    padding: 20,
-    borderRadius: 16,
+    padding: 10,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
     shadowColor: '#f8d06f',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.5,
-    shadowRadius: 6,
+    shadowRadius: 15,
   },
   mapPreviewText: {
-    fontSize: 19,
+    fontSize: 14,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
-    color: '#000'
+    fontFamily: 'PixelifySans-Regular',
+    color: '#000',
   },
+
   bottomButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20
+    marginBottom: 12,
   },
   bottomButton: {
     backgroundColor: '#f8d06f',
-    padding: 15,
+    padding: 4,
     borderRadius: 10,
     width: '48%',
     alignItems: 'center',
     shadowColor: '#f8d06f',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
-    shadowRadius: 6,
+    shadowRadius: 12,
   },
   bottomButtonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    fontFamily: 'SpaceMono',
-    color: '#000'
+    fontFamily: 'PixelifySans-Regular',
+    color: '#000',
   },
+
   addStoryButton: {
     backgroundColor: '#f8d06f',
-    padding: 15,
+    padding: 12,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#f8d06f',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.6,
+    shadowRadius: 14,
   },
   addStoryButtonText: {
-    color: 'black',
+    color: '#000',
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
-    fontSize: 24
+    fontFamily: 'PixelifySans-Regular',
+    fontSize: 18,
   },
+
   searchResults: {
-    backgroundColor: '#ffffffcc',
+    backgroundColor: '#1a1a1a',
     padding: 10,
     borderRadius: 10,
-    marginBottom: 20
+    marginBottom: 20,
+    borderColor: '#f8d06f',
+    borderWidth: 1,
   },
   searchResultItem: { marginBottom: 10 },
-  searchResultTitle: { fontSize: 16, fontWeight: 'bold' },
-  searchResultLocation: { fontSize: 14, color: '#555' },
+  searchResultTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#f8d06f',
+  },
+  searchResultLocation: {
+    fontSize: 14,
+    color: '#aaa',
+  },
+
   imageBackground: {
     width: '100%',
-    height: 250,
+    height: 210,
     marginBottom: 20,
     borderRadius: 10,
     overflow: 'hidden',
   },
-  overlay: { backgroundColor: 'rgba(0, 0, 0, 0.2)', flex: 1, borderRadius: 10 },
+
 
   popupContainer: {
     position: 'absolute',
     top: 100,
     left: 0,
-    backgroundColor: 'transparent',  // Changed from #000 to transparent
+    backgroundColor: 'transperent',
     borderRadius: 12,
     padding: 10,
     zIndex: 99,
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
   },
   popupImage: {
-    width: 100,
+    width: 80,
     height: 100,
-    borderRadius: 8
+    borderRadius: 8,
   },
   popupClose: {
     position: 'absolute',
     top: 5,
     right: 5,
-    zIndex: 1
+    zIndex: 1,
   },
 });

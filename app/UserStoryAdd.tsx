@@ -70,6 +70,7 @@ const StoryAddScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Enter the title of the legend"
+        placeholderTextColor="#888"
         value={title}
         onChangeText={setTitle}
       />
@@ -78,6 +79,7 @@ const StoryAddScreen = () => {
       <TextInput
         style={[styles.input, { height: 80 }]}
         placeholder="Describe the legend"
+        placeholderTextColor="#888"
         value={description}
         onChangeText={setDescription}
         multiline
@@ -87,6 +89,7 @@ const StoryAddScreen = () => {
       <TextInput
         style={styles.input}
         placeholder="Enter the location of the legend"
+        placeholderTextColor="#888"
         value={location}
         onChangeText={setLocation}
       />
@@ -129,48 +132,120 @@ export default StoryAddScreen;
 
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  header: { fontSize: 20, fontWeight: 'bold', alignSelf: 'center' },
-  subHeader: { fontSize: 30, fontWeight: 'bold', alignSelf: 'center', marginBottom: 20 },
-  label: { marginTop: 10, marginBottom: 4, fontWeight: 'bold' },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#000', // black background
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  },
+  subHeader: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    alignSelf: 'center',
+    marginBottom: 20,
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  },
+  label: {
+    marginTop: 10,
+    marginBottom: 4,
+    fontWeight: 'bold',
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
+  },
   input: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#111',
     borderRadius: 10,
     padding: 12,
     marginBottom: 10,
+    color: '#888',
+    fontFamily: 'PixelifySans-Regular',
   },
-  storyTypeContainer: { flexDirection: 'row', justifyContent: 'space-between', marginVertical: 10 },
+  storyTypeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
   storyTypeButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#222',
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 14,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
   },
   storyTypeButtonSelected: {
-    backgroundColor: '#000',
+    backgroundColor: '#f8d06f',
   },
   storyTypeText: {
-    color: '#333',
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
   },
   storyTypeTextSelected: {
-    color: '#fff',
+    color: '#000',
+    fontFamily: 'PixelifySans-Regular',
   },
   imageUploadButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#111',
     padding: 12,
     borderRadius: 10,
     alignItems: 'center',
     marginVertical: 10,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  previewImage: { width: '100%', height: 200, borderRadius: 10, marginTop: 10 },
-  hiddenGemTitle: { marginTop: 20, fontWeight: 'bold', fontSize: 16 },
-  premiumText: { color: '#888', fontSize: 14, marginBottom: 20 },
+  previewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  hiddenGemTitle: {
+    marginTop: 20,
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
+  },
+  premiumText: {
+    color: '#888',
+    fontSize: 14,
+    marginBottom: 20,
+    fontFamily: 'PixelifySans-Regular',
+  },
   submitButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#f8d06f',
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 10,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  submitButtonText: { color: '#fff', fontWeight: 'bold' },
+  submitButtonText: {
+    color: 'FFFFFF',
+    fontWeight: 'bold',
+    fontFamily: 'PixelifySans-Regular',
+  },
 });

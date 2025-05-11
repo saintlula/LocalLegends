@@ -52,21 +52,42 @@ export default function ListViewScreen() {
     });
   };
 
-  const renderItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.item} onPress={() => handleLegendPress(item.id)}>
-      <Text style={styles.title}>{item.title}</Text>
-      {item.latitude && item.longitude && (
-        <Text style={styles.description}>
-          Location: {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
-        </Text>
-      )}
-      {item.hiddenGem && <Text style={styles.hiddenGem}>💎 Hidden Gem</Text>}
-    </TouchableOpacity>
-  );
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    const dynamicHeight = 120 + (index % 3) * 30;
+    const rotateDeg = (index % 2 === 0 ? -1 : 1) * (index % 3);
+    const isHiddenGem = item.hiddenGem;
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.item,
+          {
+            height: dynamicHeight,
+            transform: [{ rotate: `${rotateDeg}deg` }],
+            borderColor: isHiddenGem ? '#f8d06f' : '#444',
+            borderWidth: isHiddenGem ? 2 : 1,
+            shadowColor: '#f8d06f',
+            shadowOpacity: 0.7,
+            shadowRadius: 10,
+            shadowOffset: { width: 0, height: 0 },
+            backgroundColor: '#111',
+          },
+        ]}
+        onPress={() => handleLegendPress(item.id)}
+      >
+        <Text style={styles.title}>{item.title}</Text>
+        {item.latitude && item.longitude && (
+          <Text style={styles.description}>
+            📍 {item.latitude.toFixed(4)}, {item.longitude.toFixed(4)}
+          </Text>
+        )}
+        {isHiddenGem && <Text style={styles.hiddenGem}>💎 Hidden Gem</Text>}
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea]}>
-      {/* Back Button with dynamic safe top spacing */}
       <TouchableOpacity
         style={[styles.backButton, { top: insets.top + 10 }]}
         onPress={() => router.back()}
@@ -75,7 +96,7 @@ export default function ListViewScreen() {
       </TouchableOpacity>
 
       <FlatList
-        contentContainerStyle={{ paddingTop: insets.top + 60, paddingBottom: 20 }}
+        contentContainerStyle={{ paddingTop: insets.top + 60, paddingBottom: 40 }}
         data={legends}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
@@ -87,34 +108,63 @@ export default function ListViewScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000', // Black background for neon theme
   },
   item: {
-    backgroundColor: '#fff',
+    marginVertical: 10,
+    marginHorizontal: 20,
     padding: 16,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 10,
-    elevation: 3,
+    borderRadius: 20,
+    justifyContent: 'center',
+    shadowColor: '#f8d06f',
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  title: { fontSize: 18, fontWeight: 'bold', color: '#3b6e82' },
-  description: { fontSize: 14, color: '#555', marginTop: 4 },
-  hiddenGem: { marginTop: 6, color: 'blue', fontWeight: 'bold' },
+  title: {
+    fontSize: 20,
+    fontFamily: 'PixelifySans-Regular',
+    color: '#f8d06f',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
+  },
+  description: {
+    fontSize: 14,
+    color: '#ccc',
+    marginTop: 6,
+    fontFamily: 'Girassol-Regular',
+  },
+  hiddenGem: {
+    marginTop: 8,
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
+  },
   backButton: {
     position: 'absolute',
     left: 20,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
-    zIndex: 1,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
+    backgroundColor: '#111',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    zIndex: 10,
+    borderColor: '#f8d06f',
+    borderWidth: 1,
+    shadowColor: '#f8d06f',
+    shadowOpacity: 0.7,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 6,
   },
   backButtonText: {
-    color: '#3b6e82',
+    color: '#f8d06f',
     fontWeight: 'bold',
+    fontFamily: 'PixelifySans-Regular',
+    fontSize: 16,
+    textShadowColor: '#f8d06f',
+    textShadowRadius: 4,
   },
 });

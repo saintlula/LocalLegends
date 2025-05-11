@@ -1,21 +1,16 @@
-import * as Font from 'expo-font';
-import {useEffect, useState} from 'react';
+// hooks/useCustomFonts.ts
 
-export default function useCustomFonts()
-{
-    const [fontsLoaded, setFontsLoaded] = useState(false);
+import { useFonts } from 'expo-font';
+import { useState, useEffect } from 'react';
 
-    useEffect(() =>
-    {
-        async function loadFonts()
-        {
-            await Font.loadAsync
-            ({
-            });
-            setFontsLoaded(true);
-        }
-        loadFonts();
-    }, []);
+export default function useCustomFonts() {
+  // Load your custom fonts here
+  const [fontsLoaded] = useFonts({
+    'PixelifySans-Regular': require('../assets/fonts/PixelifySans-Regular.ttf'),
+    'Jacquard12-Regular': require('../assets/fonts/Jacquard12-Regular.ttf'),
+    'Girassol-Regular': require('../assets/fonts/Girassol-Regular.ttf'),
+  });
 
-    return fontsLoaded;
+  // Return the fontsLoaded boolean to be used in components
+  return fontsLoaded;
 }

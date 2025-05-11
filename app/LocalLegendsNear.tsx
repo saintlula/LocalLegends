@@ -31,14 +31,6 @@ export default function LocalLegendsMapActivity() {
     })();
   }, []);
 
-  if (!locationGranted) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text>Requesting location permission...</Text>
-      </SafeAreaView>
-    );
-  }
-
   const handleShowDetails = () => {
     if (selectedLegendId) {
       router.push({ pathname: '/StoryDetails', params: { id: selectedLegendId } });
@@ -61,27 +53,33 @@ export default function LocalLegendsMapActivity() {
     }
   };
 
+  if (!locationGranted) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.userText}>Requesting location permission...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Local Legends Map Activity</Text>
-
-      <View style={styles.mapContainer}>
+      <View style={styles.mapWrapper}>
         <Image
-          source={{
-            uri: 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Stavanger_city_map_cut.jpg',
-          }}
-          style={styles.mapImage}
-          resizeMode="cover"
+          source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Stavanger_city_map_cut.jpg' }}
+          style={styles.mapBackground}
         />
-        <Text style={styles.mapText}>There are {legends.length} local legends near you!</Text>
+        <View style={styles.statsOverlay}>
+          <Text style={styles.statsText}>{legends.length} Legends Nearby</Text>
+        </View>
       </View>
 
-      <View style={styles.listContainer}>
-        <Text style={styles.listTitle}>Local Legends</Text>
-        <Text style={styles.listSubtitle}>Tap a legend to select</Text>
+      <View style={styles.legendCard}>
+        <Text style={styles.legendTitle}>Nearby Legends</Text>
         <FlatList
           data={legends}
           keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.legendList}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[
@@ -90,71 +88,138 @@ export default function LocalLegendsMapActivity() {
               ]}
               onPress={() => setSelectedLegendId(item.id)}
             >
-              <View>
-                <Text style={styles.legendName}>{item.title}</Text>
-                <Text style={styles.legendCategory}>Category: {item.category}</Text>
-              </View>
-              <Text style={styles.legendDistance}>
-                Distance: {item.distance || 'N/A'} miles
-              </Text>
+              <Text style={styles.legendName}>{item.title}</Text>
+              <Text style={styles.legendCategory}>{item.category}</Text>
             </TouchableOpacity>
           )}
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleShowDetails}>
-        <Text style={styles.buttonText}>Show Legend Details</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[styles.button, styles.blackButton]}
-        onPress={handleNavigateToLegend}
-      >
-        <Text style={[styles.buttonText, { color: 'white' }]}>Navigate to Legend</Text>
-      </TouchableOpacity>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity onPress={handleShowDetails} style={styles.floatingButton}>
+          <Image
+            source={require('../assets/images/bookPixel.png')}
+            style={styles.floatingImage1}
+          />
+        </TouchableOpacity>
+        <Image
+            source={require('../assets/images/locationPixel.png')}
+            style={styles.floatingImage2}
+          />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: 'white' },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  mapContainer: {
-    backgroundColor: '#d9e3f0',
-    borderRadius: 16,
-    padding: 10,
-    marginBottom: 20,
-    alignItems: 'center',
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
   },
-  mapImage: { width: '100%', height: 150, borderRadius: 12 },
-  mapText: { marginTop: 10, fontWeight: 'bold', fontSize: 16 },
-  listContainer: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 16,
-    padding: 10,
-    marginBottom: 20,
+  mapWrapper: {
+    height: '45%',
+    position: 'relative',
   },
-  listTitle: { fontSize: 18, fontWeight: 'bold' },
-  listSubtitle: { fontSize: 14, color: 'gray', marginBottom: 10 },
+  mapBackground: {
+    width: '100%',
+    height: '100%',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+  statsOverlay: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#f8d06f',
+  },
+  statsText: {
+    color: '#f8d06f',
+    fontSize: 16,
+    fontFamily: 'PixelifySans-Regular',
+    fontWeight: 'bold',
+  },
+  legendCard: {
+    position: 'absolute',
+    top: '40%',
+    left: 20,
+    right: 20,
+    backgroundColor: '#111',
+    borderRadius: 20,
+    padding: 16,
+    elevation: 10,
+    shadowColor: '#f8d06f',
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+  },
+  legendTitle: {
+    fontSize: 18,
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
+    marginBottom: 10,
+  },
+  legendList: {
+    paddingBottom: 80,
+  },
   legendItem: {
+    backgroundColor: '#1a1a1a',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  selectedLegend: {
+    borderColor: '#f8d06f',
+    backgroundColor: '#222',
+  },
+  legendName: {
+    color: '#f8d06f',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'PixelifySans-Regular',
+    
+  },
+  legendCategory: {
+    color: 'gray',
+    fontSize: 12,
+  },
+  actionButtons: {
+    position: 'absolute',
+    bottom: 30,
+    left: 30,
+    right: 30,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    marginBottom: 10,
   },
-  selectedLegend: { backgroundColor: '#cde1f9' },
-  legendName: { fontWeight: 'bold' },
-  legendCategory: { fontSize: 12, color: 'gray' },
-  legendDistance: { fontSize: 12, color: 'gray' },
-  button: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 12,
+  floatingButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#000',
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
   },
-  buttonText: { fontWeight: 'bold', fontSize: 16 },
-  blackButton: { backgroundColor: '#000' },
+
+  floatingImage1: {
+    width: 70,
+    height: 70,
+    resizeMode: 'contain', 
+  },
+
+  floatingImage2: {
+    width: 60,
+    height: 60,
+    resizeMode: 'contain', 
+  },
+  
+  userText: {
+    color: '#f8d06f',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });

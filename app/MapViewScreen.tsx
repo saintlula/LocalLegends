@@ -67,7 +67,7 @@ export default function MapViewScreen() {
       )}
 
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>⬅ Back to Home</Text>
+        <Text style={styles.backButtonText}>⬅</Text>
       </TouchableOpacity>
     </View>
   );
@@ -79,14 +79,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     left: 20,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 8,
+    backgroundColor: '#111',
+    padding: 12,
+    borderRadius: 30,
     elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 2,
+    shadowColor: '#f8d06f',
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 8,
+  },
+  backIcon: {
+    textShadowColor: '#f8d06f',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   backButtonText: {
     color: '#3b6e82',
