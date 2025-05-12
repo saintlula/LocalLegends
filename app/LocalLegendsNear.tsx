@@ -2,15 +2,17 @@ import React, { useEffect, useState } from 'react';
 import {View,Text,StyleSheet,Image,FlatList,TouchableOpacity,Linking,Alert,SafeAreaView,} from 'react-native';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-import { useLegends } from '../hooks/useLegends';
+import { useLegends } from '../hooks/useLegends';//custom hook to fetch legends from Firestore
 
 export default function LocalLegendsMapActivity() 
 {
+  //custom hook to fetch legends from Firestore
   const [locationGranted, setLocationGranted] = useState(false);
+  //ID of the currently selected legend
   const [selectedLegendId, setSelectedLegendId] = useState<string | null>(null);
   const router = useRouter();
   const { legends } = useLegends();
-
+  //Request location permissions when screen loads
   useEffect(() => 
   {
     (async () => 
@@ -24,7 +26,7 @@ export default function LocalLegendsMapActivity()
       }
     })();
   }, []);
-
+  //Navigate to StoryDetails for the selected legend
   const handleShowDetails = () => 
   {
     if (selectedLegendId) 
@@ -35,12 +37,13 @@ export default function LocalLegendsMapActivity()
       Alert.alert('Please select a legend first');
     }
   };
-
+  //Open Google Maps directions to the legend's coordinates
   const handleNavigateToLegend = () => 
   {
     if (selectedLegendId) 
     {
       const selectedLegend = legends.find(l => l.id === selectedLegendId);
+      //Ensure we have valid coordinates
       if (selectedLegend && selectedLegend.location?.latitude && selectedLegend.location?.longitude) {
         const { latitude, longitude } = selectedLegend.location;
         const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
@@ -54,7 +57,7 @@ export default function LocalLegendsMapActivity()
       Alert.alert('Please select a legend first');
     }
   };
-
+  //If permission hasn’t been granted yet, show a waiting message
   if (!locationGranted) 
   {
     return (
@@ -115,7 +118,7 @@ export default function LocalLegendsMapActivity()
     </SafeAreaView>
   );
 }
-
+//Styyyyliiiiing!
 const styles = StyleSheet.create({
   container: 
   {

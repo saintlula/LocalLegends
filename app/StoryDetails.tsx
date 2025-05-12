@@ -19,7 +19,7 @@ const StoryDetailsScreen = () =>
   const [reviews, setReviews] = useState<any[]>([]);
   const [username, setUsername] = useState('');
   const auth = getAuth();  
-
+  //Fetch legend and reviews on load
   useEffect(() => 
   {
     const fetchLegend = async () => 
@@ -51,7 +51,7 @@ const StoryDetailsScreen = () =>
     fetchReviews();
     fetchUsername();
   }, [storyId]);
-
+  //Add a new review
   const handleAddReview = async () => 
   {
     if (!newReview.trim()) return;
@@ -69,7 +69,7 @@ const StoryDetailsScreen = () =>
   
       const reviewsRef = collection(db, 'legends', storyId, 'reviews');
       await addDoc(reviewsRef, newReviewData);
-  
+      //Optimistically update UI
       setReviews((prev: any[]) => [...prev, newReviewData]);
   
       setNewReview('');
@@ -79,7 +79,7 @@ const StoryDetailsScreen = () =>
       console.error('Error adding review:', error);
     }
   };
-
+  //Show loading screen if legend isn't fetched yet
   if (!legend) 
     {
     return (
@@ -184,7 +184,7 @@ const StoryDetailsScreen = () =>
 };
 
 export default StoryDetailsScreen;
-
+//A lot of styling :(
 const styles = StyleSheet.create({
   safeArea: 
   {

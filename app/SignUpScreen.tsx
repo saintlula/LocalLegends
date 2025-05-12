@@ -7,26 +7,27 @@ import useCustomFonts from '../hooks/useCustomFont';
 
 export default function SignUpScreen() 
 {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const router = useRouter();
-
+  const [email, setEmail] = useState('');//Input state
+  const [password, setPassword] = useState('');//Input state
+  const router = useRouter();//Navigation hook
+  //Wait for fonts to load before rendering
   const fontsLoaded = useCustomFonts();
   if (!fontsLoaded) return null;
-
+  //Sign-up logic using Firebase Auth
   const handleSignUp = async () => 
   {
     try 
     {
       await createUserWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "Account created!");
-      router.replace('/');
+      router.replace('/');//Redirect to main/home screen
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert("Error", error.message);//Show Firebase error
     }
   };
 
   return (
+    //Dismiss keyboard when tapping outside input fields
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <Text style={styles.title}>Join the legend</Text>
@@ -61,7 +62,7 @@ export default function SignUpScreen()
     </TouchableWithoutFeedback>
   );
 }
-
+//STYLING :)
 const styles = StyleSheet.create({
   container: 
   {

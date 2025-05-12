@@ -26,7 +26,7 @@ export default function HomeScreen()
   const [displayName, setDisplayName] = useState('Guest'); 
   const slideAnim = useState(new Animated.Value(-300))[0];
 
-  //Say hi to user, cut the @login.com
+  //on load, set user display name from Firebase Auth. basically say hi.
   useEffect(() => 
   {
     const auth = getAuth();
@@ -41,7 +41,7 @@ export default function HomeScreen()
     }
   }, []);
 
-  //Premium user pop up
+  //Premium user pop up, only if the user is premium. 
   useEffect(() => 
   {
     if (isPremium === 'true') 
@@ -55,10 +55,10 @@ export default function HomeScreen()
           duration: 500,
           useNativeDriver: true,
         }).start();
-      }, 2000);
+      }, 2000); //show after 2 secs
     }
   }, [isPremium]);
-
+  //handler when user clicks a category
   const handleCategoryPress = (category: string) => 
   {
     setSelectedCategory(category);
@@ -74,7 +74,7 @@ export default function HomeScreen()
   {
     router.push({ pathname: '/StoryDetails', params: { id: storyId } });
   };
-
+  //navigation handlers.
   const handleMapActivityPress = () => 
   {
     router.push('/LocalLegendsNear');
@@ -100,7 +100,7 @@ export default function HomeScreen()
     router.push('/HiddenGemScreen');
   };
 
-  //Local Legends Search 
+  //Local Legends Search filter
   const filteredLegends = legends.filter((legend) => 
     {
     const query = searchQuery.toLowerCase();
@@ -108,7 +108,7 @@ export default function HomeScreen()
     const locationName = typeof legend.locationName === 'string' ? legend.locationName.toLowerCase() : '';
     return title.includes(query) || locationName.includes(query);
   });
-
+  //Filter legends by selected category
   const filteredCategoryLegends = selectedCategory
     ? legends.filter((legend) => legend.category === selectedCategory)
     : [];
@@ -249,8 +249,7 @@ export default function HomeScreen()
     </TouchableWithoutFeedback>
   );
 }
-
-//Back container
+//STYLIIINNNGG!!
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,

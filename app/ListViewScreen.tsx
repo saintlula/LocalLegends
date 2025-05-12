@@ -7,12 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ListViewScreen() 
 {
+  //State to store all fetched legends
   const [legends, setLegends] = useState<any[]>([]);
   const router = useRouter();
-  const insets = useSafeAreaInsets();
-
+  const insets = useSafeAreaInsets();//Used to respect phone safe areas like notch etc
+  //Fetch legends from Firestore when the component mounts
   useEffect(() => 
   {
+    //Retrieve documents from the "legends" Firestore collection
     fetchLegends();
   }, []);
 
@@ -22,11 +24,12 @@ export default function ListViewScreen()
     {
       const querySnapshot = await getDocs(collection(db, 'legends'));
       const fetchedLegends: any[] = [];
+      //Process each legend and extract location
       querySnapshot.forEach((doc) => 
       {
         const data = doc.data();
         const geo = data.location;
-
+        //handle both GeoPoint formats (_lat, _long and latitude, longitude
         const latitude = geo?.latitude ?? geo?._lat;
         const longitude = geo?.longitude ?? geo?._long;
 
@@ -43,7 +46,7 @@ export default function ListViewScreen()
       console.error('Error fetching legends:', error);
     }
   };
-
+  //Handle press on a legend item: navigate to StoryDetails screen
   const handleLegendPress = (legendId: string) => 
   {
     router.push({
@@ -51,9 +54,10 @@ export default function ListViewScreen()
       params: { id: legendId },
     });
   };
-
+  //Render each legend card
   const renderItem = ({ item, index }: { item: any; index: number }) => 
   {
+    //Add a bit of variation, height and rotation. Just for it to be a bit more quirky. 
     const dynamicHeight = 120 + (index % 3) * 30;
     const rotateDeg = (index % 2 === 0 ? -1 : 1) * (index % 3);
     const isHiddenGem = item.hiddenGem;

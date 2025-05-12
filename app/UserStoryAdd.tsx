@@ -5,18 +5,19 @@ import { useNavigation } from '@react-navigation/native';
 import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebaseConfig';
-const OPENCAGE_API_KEY = '23bd5b7d226f4185be5b5a391cbb4add';
+const OPENCAGE_API_KEY = '23bd5b7d226f4185be5b5a391cbb4add'; //For converting address into coordinates
 
 const StoryAddScreen = () => 
 {
   const navigation = useNavigation();
-
+  //Local state to hold story data
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [storyType, setStoryType] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
+  //Opens image picker
   const pickImage = async () => 
   {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -29,7 +30,7 @@ const StoryAddScreen = () =>
       setImage(result.assets[0].uri);
     }
   };
-
+  //Converts address string to latitude & longitude using OpenCage API instructions
   const geocodeLocation = async (locationStr: string) => 
   {
     try 
@@ -52,7 +53,7 @@ const StoryAddScreen = () =>
       return null;
     }
   };
-
+  //Submits the new story to Firestore so we can see it!
   const handleSubmit = async () => 
   {
     if (!title || !description || !location || !storyType) {

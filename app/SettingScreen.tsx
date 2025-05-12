@@ -9,15 +9,14 @@ import { router } from 'expo-router';
 
 const SettingsScreen = () => 
 {
-  const [bannerVisible, setBannerVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [bannerVisible, setBannerVisible] = useState(false);//Banner for support message
+  const [modalVisible, setModalVisible] = useState(false);//Modal state for email/password updates
   const [modalStep, setModalStep] = useState<'email' | 'password' | 'reauth-email' | 'reauth-password' | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [tempEmail, setTempEmail] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const auth = getAuth();
-  const navigation = useNavigation();
-
+  //Opens modal with specific step (email/password or reauth stages)
   const openModal = (step: typeof modalStep) =>
   {
     setModalStep(step);
@@ -31,7 +30,7 @@ const SettingsScreen = () =>
     setModalStep(null);
     setInputValue('');
   };
-
+  //Account deletion with confirmation and reauth prompt
   const handleDeleteAccount = () => 
   {
     Alert.alert(
@@ -65,13 +64,13 @@ const SettingsScreen = () =>
       { cancelable: true }
     );
   };
-
+  //Displays a support message
   const handleCustomerSupport = () => 
   {
     setBannerVisible(true);
     setTimeout(() => setBannerVisible(false), 4000);
   };
-
+  //Push notification permission (Expo)
   const requestNotificationPermission = async () => 
   {
     const { status } = await Notifications.requestPermissionsAsync();
@@ -80,7 +79,7 @@ const SettingsScreen = () =>
       Alert.alert('Permission Denied', 'You will not receive notifications from this app.');
     }
   };
-
+  //Main handler for modal input and reauthentication
   const handleModalSubmit = async () => 
   {
     const user = auth.currentUser;
@@ -193,7 +192,7 @@ const SettingsScreen = () =>
     </SafeAreaView>
   );
 };
-
+//sTYLEEEEESSS!
 const styles = StyleSheet.create({
   container: 
   {

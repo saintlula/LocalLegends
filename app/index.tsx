@@ -7,18 +7,19 @@ import useCustomFonts from '../hooks/useCustomFont';
 
 export default function LoginScreen() 
 {
+  //State for email and password fields
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
-
+  //Load custom fonts (won’t render screen until loaded)
   const fontsLoaded = useCustomFonts();
   if (!fontsLoaded) return null;
-
+  //handle login
   const handleLogin = async () => 
   {
+    //Hardcoded admin bypass. 
     if (username === 'admin@gmail.com' && password === 'adminll') 
     {
-      //User is the admin, so we set premium to true
       router.push({
         pathname: '/HomeScreen',
         params: 
@@ -52,6 +53,7 @@ export default function LoginScreen()
       } 
       else 
       {
+        //reguler authenticated user
         router.push({
           pathname: '/HomeScreen',
           params: 
@@ -64,10 +66,11 @@ export default function LoginScreen()
       }
     } catch (error: any) 
     {
+      //show alert if login fails.
       Alert.alert("Login failed", error.message);
     }
   };
-
+  //Guest login skips authentication and logs in as "Guest"
   const handleGuestLogin = () => 
   {
     router.push({
@@ -80,7 +83,7 @@ export default function LoginScreen()
       },
     });
   };
-
+  //explanation pop up that is a placeholder :)
   const handleHelp = () => 
   {
     Alert.alert(
@@ -90,6 +93,7 @@ export default function LoginScreen()
   };
 
   return (
+    //dismiss keyboard when tapping outside input fields
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <View style={styles.container}>
         <Text style={styles.title}>Welcome to</Text>

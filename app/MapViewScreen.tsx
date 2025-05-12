@@ -7,7 +7,9 @@ import { db } from '../firebaseConfig';
 
 export default function MapViewScreen() 
 {
+  //Fetched legends from Firestore
   const [legends, setLegends] = useState<any[]>([]);
+  //Initial map region, set to the first legend’s location
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const router = useRouter();
 
@@ -26,7 +28,7 @@ export default function MapViewScreen()
         fetchedLegends.push({ id: doc.id, ...doc.data() });
       });
       setLegends(fetchedLegends);
-
+      //Use the first legend to set the initial map view
       if (fetchedLegends.length > 0) 
       {
         const first = fetchedLegends[0].location;
@@ -79,7 +81,7 @@ export default function MapViewScreen()
     </View>
   );
 }
-
+//stylingS
 const styles = StyleSheet.create({
   container: 
   { 

@@ -7,21 +7,21 @@ import {getFirestore,doc,getDoc,collection,getDocs,deleteDoc,updateDoc,} from 'f
 
 export default function ProfileScreen() 
 {
-  const [user, setUser] = useState({ uid: '', email: '' });
-  const [username, setUsername] = useState('');
-  const [editingUsername, setEditingUsername] = useState(false);
-  const [stories, setStories] = useState<any[]>([]);
-  const [ratingsCount, setRatingsCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showAllStories, setShowAllStories] = useState(false);
-  const [manageModalVisible, setManageModalVisible] = useState(false);
-  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);
-  const [editingStoryTitle, setEditingStoryTitle] = useState('');
+  const [user, setUser] = useState({ uid: '', email: '' });//Auth user
+  const [username, setUsername] = useState('');  //Username management
+  const [editingUsername, setEditingUsername] = useState(false);  //Username management
+  const [stories, setStories] = useState<any[]>([]);  //User's submitted legends
+  const [ratingsCount, setRatingsCount] = useState(0); //User review stats
+  const [loading, setLoading] = useState(true);//UI control flags
+  const [showAllStories, setShowAllStories] = useState(false);//UI control flags
+  const [manageModalVisible, setManageModalVisible] = useState(false);//UI control flags
+  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);//Edit story modal
+  const [editingStoryTitle, setEditingStoryTitle] = useState('');//Edit story modal
 
   const auth = getAuth();
   const db = getFirestore();
   
-
+  //Fetch Profile Info
   useEffect(() => 
   {
     const currentUser = auth.currentUser;
@@ -38,7 +38,7 @@ export default function ProfileScreen()
     }
   }, []);
 
-
+  //Get Stored Username (If Set)
   const fetchUserProfile = async (uid: string, defaultUsername: string) => 
     {
     const userRef = doc(db, 'users', uid);
@@ -52,7 +52,7 @@ export default function ProfileScreen()
     }
   };
 
-
+  //Get User’s Own Legends
   const fetchUserStories = async (uid: string) => 
   {
     try 
@@ -71,7 +71,7 @@ export default function ProfileScreen()
       setLoading(false);
     }
   };
-
+  //Count How Many Reviews the User Has Submitted
   const fetchUserRatings = async (uid: string) => 
   {
     try 
@@ -97,7 +97,7 @@ export default function ProfileScreen()
       console.error('Error fetching ratings:', error);
     }
   };
-
+  //Username Editing
   const saveUsername = () => 
   {
     setEditingUsername(false);

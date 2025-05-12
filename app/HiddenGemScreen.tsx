@@ -5,6 +5,7 @@ import { db } from '../firebaseConfig';
 import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 
+//Defining the shape of the hidden gem
 type Gem = 
 {
   id: string;
@@ -17,12 +18,14 @@ type Gem =
 
 const HiddenGemScreen = () => 
 {
-  const [gems, setGems] = useState<Gem[]>([]);
-  const [filteredGems, setFilteredGems] = useState<Gem[]>([]);
+  //state veriables
+  const [gems, setGems] = useState<Gem[]>([]); //all of the fetched gems
+  const [filteredGems, setFilteredGems] = useState<Gem[]>([]);//gems after filtering
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'scenic' | 'bar' | 'other' | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  //calculating distance using Haversine formula (in km)
   const getDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => 
   {
     const R = 6371;
@@ -38,6 +41,7 @@ const HiddenGemScreen = () =>
     return R * c;
   };
 
+  //fetching gems from firestore
   const fetchGems = async () => 
   {
     try 
@@ -50,6 +54,7 @@ const HiddenGemScreen = () =>
         const data = doc.data();
         const location = data.location;
 
+        //make sure that the location is a valid geopoint
         if (!(location instanceof GeoPoint)) 
         {
           console.warn('Invalid GeoPoint:', doc.id, location);
@@ -73,7 +78,7 @@ const HiddenGemScreen = () =>
       console.error('❌ Error fetching gems:', error);
     }
   };
-
+  //requesting the users location permission and retrieve the current location
   const requestLocation = async () => 
   {
     try 
@@ -97,15 +102,15 @@ const HiddenGemScreen = () =>
       });
     } catch (error) 
     {
-      console.error('❌ Error getting location:', error);
+      console.error('Error getting location:', error);
     }
   };
-
+  //fetch gems and location
   useEffect(() => 
   {
     fetchGems();
     requestLocation();
-
+    //if location isnt revieved (in 3 secs) use fallback coordinates. Melbourne CBD.
     setTimeout(() => {
       if (!userLocation) 
       {
@@ -114,7 +119,7 @@ const HiddenGemScreen = () =>
       }
     }, 3000);
   }, []);
-
+  //filter gems whenever location, category, or search changes
   useEffect(() => {
     if (!userLocation) 
     {
@@ -123,7 +128,7 @@ const HiddenGemScreen = () =>
     }
 
     let results = gems;
-
+    //filter gems within 50km radius
     results = results.filter(gem => 
     {
       const distance = getDistance(userLocation.latitude, userLocation.longitude, gem.latitude, gem.longitude);
@@ -134,7 +139,7 @@ const HiddenGemScreen = () =>
     {
       results = results.filter(g => g.category === selectedCategory);
     }
-
+    //filter by search query
     if (searchQuery.trim() !== '') 
     {
       results = results.filter(g =>
@@ -218,7 +223,7 @@ const HiddenGemScreen = () =>
 };
 
 export default HiddenGemScreen;
-
+//Styliiing!!
 const styles = StyleSheet.create({
   container: 
   { 
