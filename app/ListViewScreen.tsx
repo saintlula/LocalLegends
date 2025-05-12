@@ -1,31 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-} from 'react-native';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView,} from 'react-native';
 import { useRouter } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function ListViewScreen() {
+export default function ListViewScreen() 
+{
   const [legends, setLegends] = useState<any[]>([]);
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
+  useEffect(() => 
+  {
     fetchLegends();
   }, []);
 
-  const fetchLegends = async () => {
-    try {
+  const fetchLegends = async () => 
+  {
+    try 
+    {
       const querySnapshot = await getDocs(collection(db, 'legends'));
       const fetchedLegends: any[] = [];
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach((doc) => 
+      {
         const data = doc.data();
         const geo = data.location;
 
@@ -40,19 +38,22 @@ export default function ListViewScreen() {
         });
       });
       setLegends(fetchedLegends);
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Error fetching legends:', error);
     }
   };
 
-  const handleLegendPress = (legendId: string) => {
+  const handleLegendPress = (legendId: string) => 
+  {
     router.push({
       pathname: '/StoryDetails',
       params: { id: legendId },
     });
   };
 
-  const renderItem = ({ item, index }: { item: any; index: number }) => {
+  const renderItem = ({ item, index }: { item: any; index: number }) => 
+  {
     const dynamicHeight = 120 + (index % 3) * 30;
     const rotateDeg = (index % 2 === 0 ? -1 : 1) * (index % 3);
     const isHiddenGem = item.hiddenGem;
@@ -106,11 +107,13 @@ export default function ListViewScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safeArea: 
+  {
     flex: 1,
-    backgroundColor: '#000', // Black background for neon theme
+    backgroundColor: '#000',
   },
-  item: {
+  item: 
+  {
     marginVertical: 10,
     marginHorizontal: 20,
     padding: 16,
@@ -121,7 +124,8 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  title: {
+  title: 
+  {
     fontSize: 20,
     fontFamily: 'PixelifySans-Regular',
     color: '#f8d06f',
@@ -129,13 +133,15 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
   },
-  description: {
+  description: 
+  {
     fontSize: 14,
     color: '#ccc',
     marginTop: 6,
     fontFamily: 'Girassol-Regular',
   },
-  hiddenGem: {
+  hiddenGem: 
+  {
     marginTop: 8,
     color: '#fff',
     fontSize: 16,
@@ -144,7 +150,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
-  backButton: {
+  backButton: 
+  {
     position: 'absolute',
     left: 20,
     backgroundColor: '#111',
@@ -159,7 +166,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 6,
   },
-  backButtonText: {
+  backButtonText: 
+  {
     color: '#f8d06f',
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
