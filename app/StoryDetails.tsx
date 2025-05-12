@@ -73,7 +73,7 @@ const StoryDetailsScreen = () => {
 
       <View style={styles.infoSection}>
         <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>📍 Location:</Text>
+          <Text style={styles.infoLabel}>Location:</Text>
           <Text style={styles.infoValue}>
             {typeof legend.location === 'string'
               ? legend.location
@@ -81,18 +81,18 @@ const StoryDetailsScreen = () => {
           </Text>
         </View>
         <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>🧾 Author:</Text>
+          <Text style={styles.infoLabel}>Author:</Text>
           <Text style={styles.infoValue}>{legend.isUserSubmitted ? legend.author : 'Pre-Added'}</Text>
         </View>
       </View>
 
       <View style={styles.descriptionCard}>
-        <Text style={styles.infoLabel}>📖 Story Description:</Text>
+        <Text style={styles.infoLabel}>Story Description:</Text>
         <Text style={styles.infoValue}>{legend.description}</Text>
       </View>
 
       <View style={styles.reviewsSection}>
-        <Text style={styles.infoLabel}>⭐ User Reviews:</Text>
+        <Text style={styles.infoLabel}>User Reviews:</Text>
         <FlatList
           data={legend.reviews || []}
           keyExtractor={(item, index) => index.toString()}
@@ -116,7 +116,7 @@ const StoryDetailsScreen = () => {
         />
 
         <View style={styles.anonymityToggle}>
-          <Text style={styles.infoLabel}>🕵️ Stay Anonymous?</Text>
+          <Text style={styles.infoLabel}>Stay Anonymous?</Text>
           <Button
             title={isAnonymous ? 'Yes, stay anonymous' : 'No, show my name'}
             onPress={() => setIsAnonymous((prev) => !prev)}
@@ -125,7 +125,7 @@ const StoryDetailsScreen = () => {
         </View>
 
         <Button
-          title="💬 Submit Review"
+          title="Submit Review"
           onPress={handleAddReview}
           disabled={!newReview.trim()}
           color="#f8d06f"

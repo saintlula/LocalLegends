@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard, Animated, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard, Animated, Image, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLegends } from '../hooks/useLegends';
 import useCustomFont from '../hooks/useCustomFont'
+import { useWindowDimensions } from 'react-native';
 
 const categories = [
-  { name: 'Historical Events'},
-  { name: 'Myths' },
-  { name: 'Urban Legends'}
+  { name: 'Historical Events' },
+  { name: 'Myth' },
+  { name: 'Urban Legends' }
 ];
 
 export default function HomeScreen() {
@@ -15,8 +16,9 @@ export default function HomeScreen() {
   const { username = 'Guest', isPremium = 'false' } = useLocalSearchParams();
   const { legends, loading } = useLegends();
   const [searchQuery, setSearchQuery] = useState('');
-
   const [showPopup, setShowPopup] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false); // New state for modal
+  const [selectedCategory, setSelectedCategory] = useState('');
   const slideAnim = useState(new Animated.Value(-300))[0]; // start offscreen left
 
   useEffect(() => {
@@ -33,7 +35,16 @@ export default function HomeScreen() {
   }, [isPremium]);
 
   const handleCategoryPress = (category: string) => {
-    router.push({ pathname: '/CategoryList', params: { category } });
+    setSelectedCategory(category); // Set selected category
+    setShowCategoryModal(true); // Show the modal
+  };
+
+  const handleCategoryClose = () => {
+    setShowCategoryModal(false); // Close the modal
+  };
+
+  const handleStoryClick = (storyId: string) => {
+    router.push({ pathname: '/StoryDetails', params: { id: storyId } });
   };
 
   const handleMapActivityPress = () => {
@@ -63,6 +74,10 @@ export default function HomeScreen() {
     return title.includes(query) || locationName.includes(query);
   });
 
+  const filteredCategoryLegends = selectedCategory
+    ? legends.filter((legend) => legend.category === selectedCategory)
+    : [];
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -85,19 +100,19 @@ export default function HomeScreen() {
           </View>
         )}
 
-{isPremium === 'true' && showPopup && (
-  <Animated.View style={[styles.popupContainer, { transform: [{ translateX: slideAnim }] }]}>
-    <TouchableOpacity style={styles.popupClose} onPress={() => setShowPopup(false)}>
-      <Text style={{ color: 'white', fontWeight: 'bold' }}>X</Text>
-    </TouchableOpacity>
-    <TouchableOpacity onPress={handleHiddenGemPress}>
-      <Image
-        source={require('../assets/images/LocalLegenHiddenGem.png')}
-        style={styles.popupImage}
-      />
-    </TouchableOpacity>
-  </Animated.View>
-)}
+        {isPremium === 'true' && showPopup && (
+          <Animated.View style={[styles.popupContainer, { transform: [{ translateX: slideAnim }] }]}>
+            <TouchableOpacity style={styles.popupClose} onPress={() => setShowPopup(false)}>
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>X</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleHiddenGemPress}>
+              <Image
+                source={require('../assets/images/LocalLegenHiddenGem.png')}
+                style={styles.popupImage}
+              />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         <TextInput
           placeholder="Search for stories or locations"
@@ -113,7 +128,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 key={legend.id}
                 style={styles.searchResultItem}
-                onPress={() => router.push({ pathname: '/StoryDetails', params: { id: legend.id } })}
+                onPress={() => handleStoryClick(legend.id)}
               >
                 <Text style={styles.searchResultTitle}>{legend.title}</Text>
                 <Text style={styles.searchResultLocation}>{legend.locationName}</Text>
@@ -124,16 +139,16 @@ export default function HomeScreen() {
 
         <Text style={styles.sectionTitle}>Category Filter</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
-  <TouchableOpacity style={styles.categoryButton}>
-    <Text style={styles.categoryText}>Urban Legends</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.categoryButton}>
-    <Text style={styles.categoryText}>Historical Events</Text>
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.categoryButton}>
-    <Text style={styles.categoryText}>Myths</Text>
-  </TouchableOpacity>
-</ScrollView>
+          <TouchableOpacity style={styles.categoryButton} onPress={() => handleCategoryPress('Urban Legends')}>
+            <Text style={styles.categoryText}>Urban Legends</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryButton} onPress={() => handleCategoryPress('Historical Events')}>
+            <Text style={styles.categoryText}>Historical Events</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryButton} onPress={() => handleCategoryPress('Myth')}>
+            <Text style={styles.categoryText}>Myth</Text>
+          </TouchableOpacity>
+        </ScrollView>
 
         <ImageBackground
           source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Old-world-map.jpg' }}
@@ -141,22 +156,53 @@ export default function HomeScreen() {
         >
         </ImageBackground>
 
+        <View style={styles.bottomButtons}>
         <TouchableOpacity style={styles.mapPreview} onPress={handleMapActivityPress}>
           <Text style={styles.mapPreviewText}>Featured and Trending Local Legends near you</Text>
         </TouchableOpacity>
 
-        <View style={styles.bottomButtons}>
-          <TouchableOpacity style={styles.bottomButton} onPress={handleMapView}>
-            <Text style={styles.bottomButtonText}>Map View</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.bottomButton} onPress={handleListView}>
-            <Text style={styles.bottomButtonText}>List of Local Legends</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.middleButtons}>
+              <TouchableOpacity style={styles.bottomButton} onPress={handleMapView}>
+                <Text style={styles.bottomButtonText}>Map View</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.bottomButton} onPress={handleListView}>
+                <Text style={styles.bottomButtonText}>List of Local Legends</Text>
+              </TouchableOpacity>
+            </View>
 
         <TouchableOpacity style={styles.addStoryButton} onPress={handleSubmitStory}>
           <Text style={styles.addStoryButtonText}>Have a story to tell? You can add it!</Text>
         </TouchableOpacity>
+
+        </View>
+
+        {/* Category Modal */}
+        <Modal
+          visible={showCategoryModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={handleCategoryClose}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <TouchableOpacity style={styles.modalClose} onPress={handleCategoryClose}>
+                <Text style={styles.modalCloseText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Stories in {selectedCategory}</Text>
+              <ScrollView style={styles.modalScroll}>
+                {filteredCategoryLegends.map((legend) => (
+                  <TouchableOpacity
+                    key={legend.id}
+                    style={styles.modalStoryItem}
+                    onPress={() => handleStoryClick(legend.id)}
+                  >
+                    <Text style={styles.modalStoryTitle}>{legend.title}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     </TouchableWithoutFeedback>
   );
@@ -211,7 +257,7 @@ const styles = StyleSheet.create({
     color: '#f8d06f',
     padding: 12,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 70,
     fontFamily: 'PixelifySans-Regular',
     borderWidth: 1,
     borderColor: '#f8d06f',
@@ -232,6 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginBottom: 20,
     paddingRight: 10,
+    alignSelf: 'flex-start',
   },
   categoryButton: {
     padding: 8,
@@ -243,24 +290,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 8,
+    alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: 16,
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
   },
-
+//??
   mapPreview: {
     backgroundColor: '#f8d06f',
     padding: 10,
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
     shadowColor: '#f8d06f',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.5,
     shadowRadius: 15,
   },
+  //no
   mapPreviewText: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -269,10 +318,15 @@ const styles = StyleSheet.create({
   },
 
   bottomButtons: {
+    marginBottom: 10,
+  },
+
+  middleButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    marginBottom: 10,
   },
+
   bottomButton: {
     backgroundColor: '#f8d06f',
     padding: 4,
@@ -283,7 +337,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.5,
     shadowRadius: 12,
+  
   },
+  //no
   bottomButtonText: {
     fontSize: 18,
     fontWeight: '600',
@@ -312,7 +368,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
     padding: 10,
     borderRadius: 10,
-    marginBottom: 20,
+    marginBottom: 10,
     borderColor: '#f8d06f',
     borderWidth: 1,
   },
@@ -320,7 +376,9 @@ const styles = StyleSheet.create({
   searchResultTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'PixelifySans-Regular',
     color: '#f8d06f',
+    
   },
   searchResultLocation: {
     fontSize: 14,
@@ -330,12 +388,11 @@ const styles = StyleSheet.create({
   imageBackground: {
     width: '100%',
     height: 210,
-    marginBottom: 20,
+    marginBottom: 100,
     borderRadius: 10,
     overflow: 'hidden',
   },
-
-
+  
   popupContainer: {
     position: 'absolute',
     top: 100,
@@ -361,5 +418,46 @@ const styles = StyleSheet.create({
     top: 5,
     right: 5,
     zIndex: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background
+  },
+  modalContent: {
+    backgroundColor: '#1a1a1a',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    maxHeight: '80%',
+  },
+  modalClose: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  modalCloseText: {
+    color: '#f8d06f',
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  modalTitle: {
+    fontSize: 30,
+    marginBottom: 10,
+    color: '#f8d06f',
+    fontFamily: 'Jacquard12-Regular',
+  },
+  modalScroll: {
+    maxHeight: '70%',
+  },
+  modalStoryItem: {
+    marginBottom: 15,
+  },
+  modalStoryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#f8d06f',
+    fontFamily: 'PixelifySans-Regular',
   },
 });

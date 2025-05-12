@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, SafeAreaView, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { db } from '../firebaseConfig'; // make sure the path is correct
+import { db } from '../firebaseConfig';
+
+const OPENCAGE_API_KEY = '23bd5b7d226f4185be5b5a391cbb4add';
 
 const StoryAddScreen = () => {
   const navigation = useNavigation();
@@ -26,33 +28,57 @@ const StoryAddScreen = () => {
     }
   };
 
+  const geocodeLocation = async (locationStr: string) => {
+    try {
+      const response = await fetch(
+        `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(locationStr)}&key=${OPENCAGE_API_KEY}`
+      );
+      const data = await response.json();
+      if (data.results && data.results.length > 0) {
+        const { lat, lng } = data.results[0].geometry;
+        return new GeoPoint(lat, lng);
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     if (!title || !description || !location || !storyType) {
       alert('Please fill in all required fields.');
       return;
     }
-  
+
     const auth = getAuth();
     const user = auth.currentUser;
-  
+
     if (!user) {
       alert('You must be logged in to submit a story.');
       return;
     }
-  
+
+    const geoPoint = await geocodeLocation(location);
+
+    if (!geoPoint) {
+      alert('Could not find location. Please try a different name.');
+      return;
+    }
+
     try {
       await addDoc(collection(db, 'legends'), {
         title,
         description,
-        location,
+        location: geoPoint,
         category: storyType,
         image: image || '',
-        latitude: 0, // placeholder for now
-        longitude: 0,
-        userId: user.uid, // ✅ user ID added safely
+        userId: user.uid,
+        author: user.email ? user.email.split('@')[0] : 'unknown',
         createdAt: new Date(),
       });
-  
+
       alert('Story submitted for moderation!');
       navigation.goBack();
     } catch (error) {
@@ -96,7 +122,7 @@ const StoryAddScreen = () => {
 
       <Text style={styles.label}>Story Type</Text>
       <View style={styles.storyTypeContainer}>
-        {['Folklore', 'Myth', 'Historical Event'].map((type) => (
+        {['Urban Legends', 'Myth', 'Historical Event'].map((type) => (
           <TouchableOpacity
             key={type}
             style={[

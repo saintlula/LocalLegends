@@ -42,8 +42,9 @@ export default function LocalLegendsMapActivity() {
   const handleNavigateToLegend = () => {
     if (selectedLegendId) {
       const selectedLegend = legends.find(l => l.id === selectedLegendId);
-      if (selectedLegend && selectedLegend.latitude && selectedLegend.longitude) {
-        const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedLegend.latitude},${selectedLegend.longitude}`;
+      if (selectedLegend && selectedLegend.location?.latitude && selectedLegend.location?.longitude) {
+        const { latitude, longitude } = selectedLegend.location;
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
         Linking.openURL(url);
       } else {
         Alert.alert('Location info not available for this legend');
@@ -102,10 +103,12 @@ export default function LocalLegendsMapActivity() {
             style={styles.floatingImage1}
           />
         </TouchableOpacity>
-        <Image
+        <TouchableOpacity onPress={handleNavigateToLegend} style={styles.floatingButton}>
+            <Image
             source={require('../assets/images/locationPixel.png')}
             style={styles.floatingImage2}
           />
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

@@ -6,14 +6,37 @@ import {
   StyleSheet,
   Alert,
   SafeAreaView,
+  Modal,
+  TextInput,
 } from 'react-native';
-import { getAuth, deleteUser } from 'firebase/auth';
+import { getAuth, deleteUser, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import * as Notifications from 'expo-notifications';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { signOut } from 'firebase/auth';
+import { router } from 'expo-router';
 
 const SettingsScreen = () => {
   const [bannerVisible, setBannerVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalStep, setModalStep] = useState<'email' | 'password' | 'reauth-email' | 'reauth-password' | null>(null);
+  const [inputValue, setInputValue] = useState('');
+  const [tempEmail, setTempEmail] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
   const auth = getAuth();
+  const navigation = useNavigation();
+
+  const openModal = (step: typeof modalStep) => {
+    setModalStep(step);
+    setInputValue('');
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setModalStep(null);
+    setInputValue('');
+  };
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -24,16 +47,18 @@ const SettingsScreen = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
+          onPress: async () => {
             const user = auth.currentUser;
             if (user) {
-              deleteUser(user)
-                .then(() => {
-                  console.log('User deleted');
-                })
-                .catch((error) => {
-                  console.error('Error deleting user:', error);
-                });
+              try {
+                await deleteUser(user);
+                await signOut(auth);
+                Alert.alert('Sorry to see you go!', 'Your account has now been deleted.');
+                router.replace('/');
+              } catch (error) {
+                console.error('Error deleting user:', error);
+                Alert.alert('Error', 'Unable to delete account. Please reauthenticate.');
+              }
             }
           },
         },
@@ -50,21 +75,41 @@ const SettingsScreen = () => {
   const requestNotificationPermission = async () => {
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Denied',
-        'You will not receive notifications from this app.'
-      );
-    } else {
-      console.log('Notification permissions granted.');
+      Alert.alert('Permission Denied', 'You will not receive notifications from this app.');
     }
   };
 
-  const handleChangeEmail = () => {
-    console.log('Change email');
-  };
+  const handleModalSubmit = async () => {
+    const user = auth.currentUser;
+    if (!user || !user.email) return;
 
-  const handleChangePassword = () => {
-    console.log('Change password');
+    try {
+      if (modalStep === 'email') {
+        setTempEmail(inputValue);
+        closeModal();
+        openModal('reauth-email');
+      } else if (modalStep === 'reauth-email') {
+        const credential = EmailAuthProvider.credential(user.email, inputValue);
+        await reauthenticateWithCredential(user, credential);
+        await updateEmail(user, tempEmail);
+        Alert.alert('Success', 'Your email has been updated.');
+        closeModal();
+      } else if (modalStep === 'password') {
+        setTempPassword(inputValue);
+        closeModal();
+        openModal('reauth-password');
+      } else if (modalStep === 'reauth-password') {
+        const credential = EmailAuthProvider.credential(user.email, inputValue);
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, tempPassword);
+        Alert.alert('Success', 'Your password has been updated.');
+        closeModal();
+      }
+    } catch (error) {
+      console.error('Credential error:', error);
+      Alert.alert('Error', 'Update failed. Please try again.');
+      closeModal();
+    }
   };
 
   return (
@@ -85,12 +130,12 @@ const SettingsScreen = () => {
           <Text style={styles.optionText}>Notification Settings</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionRow} onPress={handleChangeEmail}>
+        <TouchableOpacity style={styles.optionRow} onPress={() => openModal('email')}>
           <MaterialIcons name="email" size={20} color="#f8d06f" style={styles.icon} />
           <Text style={styles.optionText}>Change Email</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionRow} onPress={handleChangePassword}>
+        <TouchableOpacity style={styles.optionRow} onPress={() => openModal('password')}>
           <Feather name="lock" size={20} color="#f8d06f" style={styles.icon} />
           <Text style={styles.optionText}>Change Password</Text>
         </TouchableOpacity>
@@ -107,6 +152,35 @@ const SettingsScreen = () => {
           <Text style={styles.optionText}>Customer Support</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>
+              {modalStep === 'email' && 'Enter New Email'}
+              {modalStep === 'reauth-email' && 'Enter Current Password'}
+              {modalStep === 'password' && 'Enter New Password'}
+              {modalStep === 'reauth-password' && 'Enter Current Password'}
+            </Text>
+            <TextInput
+              secureTextEntry={modalStep?.includes('password')}
+              style={styles.modalInput}
+              placeholder="Enter here"
+              placeholderTextColor="#999"
+              value={inputValue}
+              onChangeText={setInputValue}
+            />
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity onPress={closeModal}>
+                <Text style={styles.modalButton}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleModalSubmit}>
+                <Text style={styles.modalButton}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -169,6 +243,42 @@ const styles = StyleSheet.create({
     textShadowColor: '#f8d06f',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#000000aa',
+    padding: 24,
+  },
+  modalContainer: {
+    backgroundColor: '#222',
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
+    color: '#f8d06f',
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'PixelifySans-Regular',
+    marginBottom: 12,
+  },
+  modalInput: {
+    backgroundColor: '#333',
+    color: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 16,
+    fontFamily: 'PixelifySans-Regular',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    color: '#f8d06f',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: 'PixelifySans-Regular',
   },
 });
 
