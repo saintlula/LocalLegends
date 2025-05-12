@@ -1,60 +1,62 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Linking,
-  Alert,
-  SafeAreaView,
-} from 'react-native';
+import {View,Text,StyleSheet,Image,FlatList,TouchableOpacity,Linking,Alert,SafeAreaView,} from 'react-native';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useLegends } from '../hooks/useLegends';
 
-export default function LocalLegendsMapActivity() {
+export default function LocalLegendsMapActivity() 
+{
   const [locationGranted, setLocationGranted] = useState(false);
   const [selectedLegendId, setSelectedLegendId] = useState<string | null>(null);
   const router = useRouter();
   const { legends } = useLegends();
 
-  useEffect(() => {
-    (async () => {
+  useEffect(() => 
+  {
+    (async () => 
+    {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission denied', 'Location permission is required.');
-      } else {
+      } else 
+      {
         setLocationGranted(true);
       }
     })();
   }, []);
 
-  const handleShowDetails = () => {
-    if (selectedLegendId) {
+  const handleShowDetails = () => 
+  {
+    if (selectedLegendId) 
+    {
       router.push({ pathname: '/StoryDetails', params: { id: selectedLegendId } });
-    } else {
+    } else 
+    {
       Alert.alert('Please select a legend first');
     }
   };
 
-  const handleNavigateToLegend = () => {
-    if (selectedLegendId) {
+  const handleNavigateToLegend = () => 
+  {
+    if (selectedLegendId) 
+    {
       const selectedLegend = legends.find(l => l.id === selectedLegendId);
       if (selectedLegend && selectedLegend.location?.latitude && selectedLegend.location?.longitude) {
         const { latitude, longitude } = selectedLegend.location;
         const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
         Linking.openURL(url);
-      } else {
+      } else 
+      {
         Alert.alert('Location info not available for this legend');
       }
-    } else {
+    } else 
+    {
       Alert.alert('Please select a legend first');
     }
   };
 
-  if (!locationGranted) {
+  if (!locationGranted) 
+  {
     return (
       <SafeAreaView style={styles.container}>
         <Text style={styles.userText}>Requesting location permission...</Text>
@@ -115,21 +117,25 @@ export default function LocalLegendsMapActivity() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     backgroundColor: '#000',
   },
-  mapWrapper: {
+  mapWrapper: 
+  {
     height: '45%',
     position: 'relative',
   },
-  mapBackground: {
+  mapBackground: 
+  {
     width: '100%',
     height: '100%',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
   },
-  statsOverlay: {
+  statsOverlay: 
+  {
     position: 'absolute',
     top: 20,
     left: 20,
@@ -139,13 +145,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#f8d06f',
   },
-  statsText: {
+  statsText: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
     fontWeight: 'bold',
   },
-  legendCard: {
+  legendCard: 
+  {
     position: 'absolute',
     top: '40%',
     left: 20,
@@ -158,16 +166,19 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 20,
   },
-  legendTitle: {
+  legendTitle:
+  {
     fontSize: 18,
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
     marginBottom: 10,
   },
-  legendList: {
+  legendList: 
+  {
     paddingBottom: 80,
   },
-  legendItem: {
+  legendItem: 
+  {
     backgroundColor: '#1a1a1a',
     borderRadius: 16,
     padding: 12,
@@ -175,22 +186,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#333',
   },
-  selectedLegend: {
+  selectedLegend: 
+  {
     borderColor: '#f8d06f',
     backgroundColor: '#222',
   },
-  legendName: {
+  legendName: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     
   },
-  legendCategory: {
+  legendCategory: 
+  {
     color: 'gray',
     fontSize: 12,
   },
-  actionButtons: {
+  actionButtons: 
+  {
     position: 'absolute',
     bottom: 30,
     left: 30,
@@ -198,7 +213,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  floatingButton: {
+  floatingButton: 
+  {
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -207,19 +223,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  floatingImage1: {
+  floatingImage1: 
+  {
     width: 70,
     height: 70,
     resizeMode: 'contain', 
   },
 
-  floatingImage2: {
+  floatingImage2: 
+  {
     width: 60,
     height: 60,
     resizeMode: 'contain', 
   },
   
-  userText: {
+  userText: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     textAlign: 'center',

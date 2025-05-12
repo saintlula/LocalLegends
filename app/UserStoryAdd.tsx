@@ -5,10 +5,10 @@ import { useNavigation } from '@react-navigation/native';
 import { addDoc, collection, GeoPoint } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebaseConfig';
-
 const OPENCAGE_API_KEY = '23bd5b7d226f4185be5b5a391cbb4add';
 
-const StoryAddScreen = () => {
+const StoryAddScreen = () => 
+{
   const navigation = useNavigation();
 
   const [title, setTitle] = useState('');
@@ -17,36 +17,44 @@ const StoryAddScreen = () => {
   const [storyType, setStoryType] = useState<string | null>(null);
   const [image, setImage] = useState<string | null>(null);
 
-  const pickImage = async () => {
+  const pickImage = async () => 
+  {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.7,
     });
 
-    if (!result.canceled) {
+    if (!result.canceled) 
+    {
       setImage(result.assets[0].uri);
     }
   };
 
-  const geocodeLocation = async (locationStr: string) => {
-    try {
+  const geocodeLocation = async (locationStr: string) => 
+  {
+    try 
+    {
       const response = await fetch(
         `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(locationStr)}&key=${OPENCAGE_API_KEY}`
       );
       const data = await response.json();
-      if (data.results && data.results.length > 0) {
+      if (data.results && data.results.length > 0) 
+      {
         const { lat, lng } = data.results[0].geometry;
         return new GeoPoint(lat, lng);
-      } else {
+      } else
+      {
         return null;
       }
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Geocoding error:', error);
       return null;
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => 
+  {
     if (!title || !description || !location || !storyType) {
       alert('Please fill in all required fields.');
       return;
@@ -55,20 +63,24 @@ const StoryAddScreen = () => {
     const auth = getAuth();
     const user = auth.currentUser;
 
-    if (!user) {
+    if (!user) 
+    {
       alert('You must be logged in to submit a story.');
       return;
     }
 
     const geoPoint = await geocodeLocation(location);
 
-    if (!geoPoint) {
+    if (!geoPoint) 
+    {
       alert('Could not find location. Please try a different name.');
       return;
     }
 
-    try {
-      await addDoc(collection(db, 'legends'), {
+    try 
+    {
+      await addDoc(collection(db, 'legends'), 
+      {
         title,
         description,
         location: geoPoint,
@@ -143,10 +155,6 @@ const StoryAddScreen = () => {
         <Text style={{ color: '#555' }}>{image ? 'Change Image' : 'Pick an Image'}</Text>
       </TouchableOpacity>
       {image && <Image source={{ uri: image }} style={styles.previewImage} />}
-
-      <Text style={styles.hiddenGemTitle}>Is There a Hidden Gem?</Text>
-      <Text style={styles.premiumText}>For Premium Members Only</Text>
-
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit Story for Moderation</Text>
       </TouchableOpacity>
@@ -158,12 +166,14 @@ export default StoryAddScreen;
 
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     padding: 20,
-    backgroundColor: '#000', // black background
+    backgroundColor: '#000', 
   },
-  header: {
+  header: 
+  {
     fontSize: 20,
     fontWeight: 'bold',
     alignSelf: 'center',
@@ -173,7 +183,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
-  subHeader: {
+  subHeader: 
+  {
     fontSize: 30,
     fontWeight: 'bold',
     alignSelf: 'center',
@@ -184,14 +195,16 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
-  label: {
+  label: 
+  {
     marginTop: 10,
     marginBottom: 4,
     fontWeight: 'bold',
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
   },
-  input: {
+  input: 
+  {
     backgroundColor: '#111',
     borderRadius: 10,
     padding: 12,
@@ -199,12 +212,14 @@ const styles = StyleSheet.create({
     color: '#888',
     fontFamily: 'PixelifySans-Regular',
   },
-  storyTypeContainer: {
+  storyTypeContainer: 
+  {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginVertical: 10,
   },
-  storyTypeButton: {
+  storyTypeButton: 
+  {
     backgroundColor: '#222',
     borderRadius: 20,
     paddingVertical: 8,
@@ -215,18 +230,22 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  storyTypeButtonSelected: {
+  storyTypeButtonSelected: 
+  {
     backgroundColor: '#f8d06f',
   },
-  storyTypeText: {
+  storyTypeText: 
+  {
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
   },
-  storyTypeTextSelected: {
+  storyTypeTextSelected: 
+  {
     color: '#000',
     fontFamily: 'PixelifySans-Regular',
   },
-  imageUploadButton: {
+  imageUploadButton: 
+  {
     backgroundColor: '#111',
     padding: 12,
     borderRadius: 10,
@@ -238,26 +257,30 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 4,
   },
-  previewImage: {
+  previewImage: 
+  {
     width: '100%',
     height: 200,
     borderRadius: 10,
     marginTop: 10,
   },
-  hiddenGemTitle: {
+  hiddenGemTitle: 
+  {
     marginTop: 20,
     fontWeight: 'bold',
     fontSize: 16,
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
   },
-  premiumText: {
+  premiumText: 
+  {
     color: '#888',
     fontSize: 14,
     marginBottom: 20,
     fontFamily: 'PixelifySans-Regular',
   },
-  submitButton: {
+  submitButton: 
+  {
     backgroundColor: '#f8d06f',
     padding: 16,
     borderRadius: 12,
@@ -269,8 +292,9 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  submitButtonText: {
-    color: 'FFFFFF',
+  submitButtonText: 
+  {
+    color: '#FFFFFF',
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
   },
