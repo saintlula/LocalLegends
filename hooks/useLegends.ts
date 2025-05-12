@@ -13,6 +13,7 @@ export interface Legend {
   location: GeoPoint;
   locationName: string;
   distance?: number;
+  userId: string;
 }
 
 export function useLegends() {

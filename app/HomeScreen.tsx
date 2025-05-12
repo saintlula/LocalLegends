@@ -2,30 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, StyleSheet, ScrollView, TouchableWithoutFeedback, Keyboard, Animated, Image, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useLegends } from '../hooks/useLegends';
-import useCustomFont from '../hooks/useCustomFont'
-import { useWindowDimensions } from 'react-native';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
+import { getAuth } from 'firebase/auth';
 
-const categories = [
+const categories =
+[
   { name: 'Historical Events' },
   { name: 'Myth' },
   { name: 'Urban Legends' }
 ];
 
-export default function HomeScreen() {
+export default function HomeScreen() 
+{
   const router = useRouter();
-  const { username = 'Guest', isPremium = 'false' } = useLocalSearchParams();
+  const { isPremium = 'false' } = useLocalSearchParams();
   const { legends, loading } = useLegends();
   const [searchQuery, setSearchQuery] = useState('');
   const [showPopup, setShowPopup] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false); // New state for modal
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const slideAnim = useState(new Animated.Value(-300))[0]; // start offscreen left
+  const [displayName, setDisplayName] = useState('Guest'); 
+  const slideAnim = useState(new Animated.Value(-300))[0];
 
-  useEffect(() => {
-    if (isPremium === 'true') {
-      setTimeout(() => {
+  useEffect(() => 
+  {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user && user.displayName) 
+    {
+      setDisplayName(user.displayName);
+    } else if (user?.email) 
+    {
+      const namePart = user.email.split('@')[0];
+      setDisplayName(namePart);
+    }
+  }, []);
+
+  useEffect(() => 
+  {
+    if (isPremium === 'true') 
+    {
+      setTimeout(() => 
+      {
         setShowPopup(true);
-        Animated.timing(slideAnim, {
+        Animated.timing(slideAnim, 
+        {
           toValue: 0,
           duration: 500,
           useNativeDriver: true,
@@ -34,40 +55,49 @@ export default function HomeScreen() {
     }
   }, [isPremium]);
 
-  const handleCategoryPress = (category: string) => {
-    setSelectedCategory(category); // Set selected category
-    setShowCategoryModal(true); // Show the modal
+  const handleCategoryPress = (category: string) => 
+  {
+    setSelectedCategory(category);
+    setShowCategoryModal(true); 
   };
 
-  const handleCategoryClose = () => {
-    setShowCategoryModal(false); // Close the modal
+  const handleCategoryClose = () => 
+  {
+    setShowCategoryModal(false);
   };
 
-  const handleStoryClick = (storyId: string) => {
+  const handleStoryClick = (storyId: string) => 
+  {
     router.push({ pathname: '/StoryDetails', params: { id: storyId } });
   };
 
-  const handleMapActivityPress = () => {
+  const handleMapActivityPress = () => 
+  {
     router.push('/LocalLegendsNear');
   };
 
-  const handleMapView = () => {
+  const handleMapView = () => 
+  {
     router.push('/MapViewScreen');
   };
 
-  const handleListView = () => {
+  const handleListView = () => 
+  {
     router.push('/ListViewScreen');
   };
 
-  const handleSubmitStory = () => {
+  const handleSubmitStory = () => 
+  {
     router.push('/UserStoryAdd');
   };
 
-  const handleHiddenGemPress = () => {
+  const handleHiddenGemPress = () => 
+  {
     router.push('/HiddenGemScreen');
   };
 
-  const filteredLegends = legends.filter((legend) => {
+  const filteredLegends = legends.filter((legend) => 
+    {
     const query = searchQuery.toLowerCase();
     const title = typeof legend.title === 'string' ? legend.title.toLowerCase() : '';
     const locationName = typeof legend.locationName === 'string' ? legend.locationName.toLowerCase() : '';
@@ -79,11 +109,12 @@ export default function HomeScreen() {
     : [];
 
   return (
+
+    
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={{ position: 'relative', marginBottom: 10 }}>
-          <Text style={styles.title}>LOCAL LEGENDS</Text>
-          <View style={{ position: 'absolute', right: 0, top: 0, flexDirection: 'row' }}>
+        
+      <View style={styles.profileNsetting}>
             <TouchableOpacity onPress={() => router.push('/SettingScreen')} style={{ padding: 10 }}>
               <Text style={{ fontSize: 22 }}>⚙️</Text>
             </TouchableOpacity>
@@ -91,15 +122,21 @@ export default function HomeScreen() {
               <Text style={{ fontSize: 22 }}>👤</Text>
             </TouchableOpacity>
           </View>
+          
+        <View style={styles.titlebox}>
+          <Text style={styles.title}>LOCAL LEGENDS</Text>
         </View>
 
-        <Text style={styles.userText}>Welcome, {username}</Text>
+        <View style={styles.userText}>
+        <Text style={styles.userText}>Welcome, {displayName}</Text>
         {isPremium === 'true' && (
           <View style={styles.badge}>
             <Text style={styles.badgeText}>🌟 Premium Member</Text>
           </View>
         )}
+        </View>
 
+        <View style={styles.popupContainer}>
         {isPremium === 'true' && showPopup && (
           <Animated.View style={[styles.popupContainer, { transform: [{ translateX: slideAnim }] }]}>
             <TouchableOpacity style={styles.popupClose} onPress={() => setShowPopup(false)}>
@@ -113,7 +150,10 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </Animated.View>
         )}
-
+        </View>
+        
+        
+        <View style={styles.searchContainer}>
         <TextInput
           placeholder="Search for stories or locations"
           placeholderTextColor="#333"
@@ -121,7 +161,6 @@ export default function HomeScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-
         {searchQuery.length > 0 && (
           <View style={styles.searchResults}>
             {filteredLegends.map((legend) => (
@@ -136,7 +175,9 @@ export default function HomeScreen() {
             ))}
           </View>
         )}
+        </View>
 
+        
         <Text style={styles.sectionTitle}>Category Filter</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryContainer}>
           <TouchableOpacity style={styles.categoryButton} onPress={() => handleCategoryPress('Urban Legends')}>
@@ -173,10 +214,8 @@ export default function HomeScreen() {
         <TouchableOpacity style={styles.addStoryButton} onPress={handleSubmitStory}>
           <Text style={styles.addStoryButtonText}>Have a story to tell? You can add it!</Text>
         </TouchableOpacity>
-
         </View>
 
-        {/* Category Modal */}
         <Modal
           visible={showCategoryModal}
           animationType="slide"
@@ -215,12 +254,21 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
   },
-  title: {
-    fontSize: 50
-    ,
+
+  titlebox:
+  {
+    width: wp('90%'),
+    height: hp('10%'),
+  },
+
+  title: 
+  {
+    fontSize: 50,
     color: '#f8d06f',
     textAlign: 'center',
     marginBottom: 10,
+    width: wp('90%'),
+    height: hp('20%'),
     fontFamily: 'Jacquard12-Regular',
     letterSpacing: 1.0,
     textTransform: 'uppercase',
@@ -228,42 +276,66 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 5, // soft yellow glow
   },
-  userText: {
+
+  profileNsetting:
+  {
+    flexDirection: 'row',
+    alignSelf: 'flex-end',
+    width: wp('20%'),
+    height: hp('8%'),
+  },
+  
+  userText: 
+  {
     fontSize: 20,
     textAlign: 'center',
-    marginBottom: 5,
+    marginBottom: 10,
     fontFamily: 'Jacquard12-Regular',
     color: '#f8d06f',
     textShadowColor: '#f8d06f',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
-  badge: {
+  badge: 
+  {
     alignSelf: 'center',
     backgroundColor: '#f8d06f',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 10,
     shadowColor: '#f8d06f',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
   },
-  badgeText: { color: '#000', fontWeight: 'bold', fontFamily: 'PixelifySans-Regular' },
+  badgeText: 
+  { 
+    color: '#000', 
+    fontWeight: 'bold', 
+    fontFamily: 'PixelifySans-Regular',
+   },
 
-  searchInput: {
+
+  searchContainer: 
+  {
+    marginBottom: 10,
+  },
+
+  searchInput: 
+  {
     backgroundColor: '#1a1a1a',
     color: '#f8d06f',
     padding: 12,
     borderRadius: 10,
-    marginBottom: 70,
+    marginBottom: 10,
     fontFamily: 'PixelifySans-Regular',
     borderWidth: 1,
     borderColor: '#f8d06f',
   },
 
-  sectionTitle: {
+  sectionTitle: 
+  {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
@@ -274,13 +346,15 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
   },
 
-  categoryContainer: {
+  categoryContainer: 
+  {
     flexDirection: 'row',
-    marginBottom: 20,
     paddingRight: 10,
-    alignSelf: 'flex-start',
+    marginBottom: 10,
   },
-  categoryButton: {
+  
+  categoryButton: 
+  {
     padding: 8,
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
@@ -292,13 +366,15 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     alignSelf: 'flex-start',
   },
-  categoryText: {
+  categoryText: 
+  {
     fontSize: 16,
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
   },
-//??
-  mapPreview: {
+
+  mapPreview: 
+  {
     backgroundColor: '#f8d06f',
     padding: 10,
     borderRadius: 12,
@@ -309,25 +385,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 15,
   },
-  //no
-  mapPreviewText: {
+  
+  mapPreviewText: 
+  {
     fontSize: 14,
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     color: '#000',
   },
 
-  bottomButtons: {
-    marginBottom: 10,
+  bottomButtons: 
+  {
+    width: wp('90%'),
+    height: hp('20%'),
   },
 
-  middleButtons: {
+  middleButtons:
+  {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 10,
   },
 
-  bottomButton: {
+  bottomButton: 
+  {
     backgroundColor: '#f8d06f',
     padding: 4,
     borderRadius: 10,
@@ -339,15 +420,17 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
   
   },
-  //no
-  bottomButtonText: {
+  
+  bottomButtonText: 
+  {
     fontSize: 18,
     fontWeight: '600',
     fontFamily: 'PixelifySans-Regular',
     color: '#000',
   },
 
-  addStoryButton: {
+  addStoryButton: 
+  {
     backgroundColor: '#f8d06f',
     padding: 12,
     borderRadius: 12,
@@ -357,14 +440,16 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.6,
     shadowRadius: 14,
   },
-  addStoryButtonText: {
+  addStoryButtonText: 
+  {
     color: '#000',
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     fontSize: 18,
   },
 
-  searchResults: {
+  searchResults: 
+  {
     backgroundColor: '#1a1a1a',
     padding: 10,
     borderRadius: 10,
@@ -372,31 +457,39 @@ const styles = StyleSheet.create({
     borderColor: '#f8d06f',
     borderWidth: 1,
   },
-  searchResultItem: { marginBottom: 10 },
-  searchResultTitle: {
+  
+  searchResultItem: 
+  {
+    marginBottom: 5,
+  },
+
+  searchResultTitle: 
+  {
     fontSize: 16,
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     color: '#f8d06f',
     
   },
-  searchResultLocation: {
+  searchResultLocation: 
+  {
     fontSize: 14,
     color: '#aaa',
   },
 
-  imageBackground: {
-    width: '100%',
-    height: 210,
-    marginBottom: 100,
+  imageBackground: 
+  {
+    width: wp('100%'),
+    height: hp('30%'),
     borderRadius: 10,
     overflow: 'hidden',
   },
   
-  popupContainer: {
+  popupContainer: 
+  {
     position: 'absolute',
-    top: 100,
-    left: 0,
+    width: wp('30%'),
+    height: hp('50%'),
     backgroundColor: 'transperent',
     borderRadius: 12,
     padding: 10,
@@ -408,53 +501,69 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 10,
   },
-  popupImage: {
+  popupImage: 
+  {
     width: 80,
     height: 100,
     borderRadius: 8,
   },
-  popupClose: {
+  popupClose: 
+  {
     position: 'absolute',
-    top: 5,
-    right: 5,
     zIndex: 1,
+    width: wp('50%'),
+    height: hp('10%'),
   },
-  modalOverlay: {
+  modalOverlay: 
+  {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background
   },
-  modalContent: {
+  modalContent: 
+  {
     backgroundColor: '#1a1a1a',
     padding: 20,
     borderRadius: 10,
     width: '80%',
     maxHeight: '80%',
   },
-  modalClose: {
+
+  modalClose: 
+  {
     position: 'absolute',
     top: 10,
     right: 10,
   },
-  modalCloseText: {
+
+  modalCloseText: 
+  {
     color: '#f8d06f',
     fontWeight: 'bold',
     fontSize: 20,
   },
-  modalTitle: {
+
+  modalTitle: 
+  {
     fontSize: 30,
     marginBottom: 10,
     color: '#f8d06f',
     fontFamily: 'Jacquard12-Regular',
   },
-  modalScroll: {
+
+  modalScroll: 
+  {
     maxHeight: '70%',
   },
-  modalStoryItem: {
+
+  modalStoryItem: 
+  {
     marginBottom: 15,
   },
-  modalStoryTitle: {
+
+  modalStoryTitle: 
+  {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#f8d06f',

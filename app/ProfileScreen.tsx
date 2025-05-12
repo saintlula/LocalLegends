@@ -8,10 +8,20 @@ import {
   TextInput,
   SafeAreaView,
   ActivityIndicator,
+  Modal,
+  Alert,
 } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  deleteDoc,
+  updateDoc,
+} from 'firebase/firestore';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState({ uid: '', email: '' });
@@ -21,6 +31,9 @@ export default function ProfileScreen() {
   const [ratingsCount, setRatingsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showAllStories, setShowAllStories] = useState(false);
+  const [manageModalVisible, setManageModalVisible] = useState(false);
+  const [editingStoryId, setEditingStoryId] = useState<string | null>(null);
+  const [editingStoryTitle, setEditingStoryTitle] = useState('');
 
   const auth = getAuth();
   const db = getFirestore();
@@ -28,18 +41,26 @@ export default function ProfileScreen() {
   useEffect(() => {
     const currentUser = auth.currentUser;
     if (currentUser) {
-      setUser({ uid: currentUser.uid, email: currentUser.email || '' });
-      fetchUserProfile(currentUser.uid);
+      const email = currentUser.email || '';
+      setUser({ uid: currentUser.uid, email });
+
+      const defaultUsername = email.split('@')[0];
+      setUsername(defaultUsername);
+
+      fetchUserProfile(currentUser.uid, defaultUsername);
       fetchUserStories(currentUser.uid);
       fetchUserRatings(currentUser.uid);
     }
   }, []);
 
-  const fetchUserProfile = async (uid: string) => {
+  const fetchUserProfile = async (uid: string, defaultUsername: string) => {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
-      setUsername(userSnap.data().username || '');
+      const storedUsername = userSnap.data().username;
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
     }
   };
 
@@ -49,7 +70,7 @@ export default function ProfileScreen() {
       const snapshot = await getDocs(legendsRef);
       const userStories = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((story: any) => story.createdBy === uid);
+        .filter((story: any) => story.userId === uid);
       setStories(userStories);
     } catch (error) {
       console.error('Error fetching stories:', error);
@@ -80,9 +101,39 @@ export default function ProfileScreen() {
   };
 
   const saveUsername = () => {
-    // Replace with logic to save username to Firestore
     setEditingUsername(false);
     console.log('Saved username:', username);
+  };
+
+  const deleteStory = async (id: string) => {
+    try {
+      await deleteDoc(doc(db, 'legends', id));
+      setStories(stories.filter((story) => story.id !== id));
+    } catch (error) {
+      console.error('Failed to delete story:', error);
+    }
+  };
+
+  const startEditStory = (id: string, currentTitle: string) => {
+    setEditingStoryId(id);
+    setEditingStoryTitle(currentTitle);
+  };
+
+  const saveEditedStory = async () => {
+    if (!editingStoryId) return;
+    try {
+      const storyRef = doc(db, 'legends', editingStoryId);
+      await updateDoc(storyRef, { title: editingStoryTitle });
+      setStories((prev) =>
+        prev.map((s) =>
+          s.id === editingStoryId ? { ...s, title: editingStoryTitle } : s
+        )
+      );
+      setEditingStoryId(null);
+      setEditingStoryTitle('');
+    } catch (error) {
+      console.error('Failed to update story:', error);
+    }
   };
 
   return (
@@ -109,7 +160,7 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <View style={styles.inputRow}>
-            <Text style={styles.infoText}>{username || 'Not set'}</Text>
+            <Text style={styles.infoText}>{username}</Text>
             <TouchableOpacity style={styles.iconButton} onPress={() => setEditingUsername(true)}>
               <Feather name="edit" size={20} color="#f8d06f" />
             </TouchableOpacity>
@@ -128,7 +179,7 @@ export default function ProfileScreen() {
           <Text style={styles.subscriptionText}>Manage Subscription</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => setManageModalVisible(true)}>
           <Text style={styles.subscriptionText}>Manage Stories</Text>
         </TouchableOpacity>
       </View>
@@ -160,9 +211,79 @@ export default function ProfileScreen() {
           />
         )}
       </View>
+
+      {/* Manage Stories Modal */}
+      <Modal
+        visible={manageModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setManageModalVisible(false)}
+      >
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.label}>Manage Your Stories</Text>
+            <FlatList
+              data={stories}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={styles.storyItem}>
+                  {editingStoryId === item.id ? (
+                    <View style={styles.inputRow}>
+                      <TextInput
+                        style={styles.input}
+                        value={editingStoryTitle}
+                        onChangeText={setEditingStoryTitle}
+                        placeholder="Edit title"
+                        placeholderTextColor="#aaa"
+                      />
+                      <TouchableOpacity onPress={saveEditedStory}>
+                        <Feather name="check" size={20} color="#f8d06f" />
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <View style={styles.inputRow}>
+                      <Text style={styles.infoText}>{item.title}</Text>
+                      <TouchableOpacity
+                        onPress={() => startEditStory(item.id, item.title)}
+                      >
+                        <Feather name="edit" size={20} color="#f8d06f" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() =>
+                          Alert.alert(
+                            'Delete Story',
+                            'Are you sure?',
+                            [
+                              { text: 'Cancel', style: 'cancel' },
+                              {
+                                text: 'Delete',
+                                style: 'destructive',
+                                onPress: () => deleteStory(item.id),
+                              },
+                            ]
+                          )
+                        }
+                      >
+                        <Feather name="trash" size={20} color="#f8d06f" style={{ marginLeft: 10 }} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              )}
+            />
+            <TouchableOpacity
+              style={[styles.actionButton, { marginTop: 20 }]}
+              onPress={() => setManageModalVisible(false)}
+            >
+              <Text style={styles.subscriptionText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -263,5 +384,21 @@ const styles = StyleSheet.create({
     fontFamily: 'PixelifySans-Regular',
     marginTop: 10,
     textAlign: 'center',
+  },
+
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#111',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#f8d06f',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
   },
 });
