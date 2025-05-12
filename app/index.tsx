@@ -5,7 +5,8 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import useCustomFonts from '../hooks/useCustomFont';
 
-export default function LoginScreen() {
+export default function LoginScreen() 
+{
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -13,12 +14,15 @@ export default function LoginScreen() {
   const fontsLoaded = useCustomFonts();
   if (!fontsLoaded) return null;
 
-  const handleLogin = async () => {
-    if (username === 'admin@gmail.com' && password === 'adminll') {
-      // User is the admin, so we set premium to true
+  const handleLogin = async () => 
+  {
+    if (username === 'admin@gmail.com' && password === 'adminll') 
+    {
+      //User is the admin, so we set premium to true
       router.push({
         pathname: '/HomeScreen',
-        params: {
+        params: 
+        {
           username: 'admin',
           isGuest: 'false',
           isPremium: 'true',
@@ -27,40 +31,49 @@ export default function LoginScreen() {
       return;
     }
 
-    try {
-      // Regular user login with Firebase Authentication
+    try 
+    {
+      //Regular user login with Firebase Authentication
       await signInWithEmailAndPassword(auth, username, password);
 
-      // Check if the logged-in user is admin
+      //Check if the logged-in user is admin, as it is meant to be a premium account
       const user = auth.currentUser;
-      if (user && user.email === 'admin@gmail.com') {
+      if (user && user.email === 'admin@gmail.com') 
+      {
         router.push({
           pathname: '/HomeScreen',
-          params: {
+          params: 
+          {
             username: user.email,
             isGuest: 'false',
-            isPremium: 'true',  // Admin is a premium user
+            isPremium: 'true',  //Admin is a premium user.
           },
         });
-      } else {
+      } 
+      else 
+      {
         router.push({
           pathname: '/HomeScreen',
-          params: {
+          params: 
+          {
             username: user ? user.email : username,
             isGuest: 'false',
-            isPremium: 'false',  // Regular user, not premium
+            isPremium: 'false',
           },
         });
       }
-    } catch (error: any) {
+    } catch (error: any) 
+    {
       Alert.alert("Login failed", error.message);
     }
   };
 
-  const handleGuestLogin = () => {
+  const handleGuestLogin = () => 
+  {
     router.push({
       pathname: '/HomeScreen',
-      params: {
+      params: 
+      {
         username: 'Guest',
         isGuest: 'true',
         isPremium: 'false',
@@ -68,7 +81,8 @@ export default function LoginScreen() {
     });
   };
 
-  const handleHelp = () => {
+  const handleHelp = () => 
+  {
     Alert.alert(
       "Hang tight!",
       "The developer will soon explain how everything works, I promise!"
@@ -103,12 +117,12 @@ export default function LoginScreen() {
           <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleGuestLogin}>
-          <Text style={styles.guestText}>Or enter as a guest!</Text>
+        <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
+          <Text style={styles.signupText}>Don't have an account yet? Sign up!</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push('/SignUpScreen')}>
-          <Text style={styles.signupText}>Or... Sign up!</Text>
+        <TouchableOpacity onPress={handleGuestLogin}>
+          <Text style={styles.guestText}>Or enter as a guest!</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleHelp} style={styles.helpContainer}>
@@ -119,14 +133,16 @@ export default function LoginScreen() {
   );
 }
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#121212',
     padding: 20,
   },
-  title: {
+  title: 
+  {
     fontSize: 35,
     color: '#fefefe',
     marginBottom: 4,
@@ -135,7 +151,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
-  logo: {
+  logo: 
+  {
     fontSize: 65,
     color: '#f8d06f',
     marginBottom: 32,
@@ -144,7 +161,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
   },
-  inputContainer: {
+  inputContainer: 
+  {
     width: '100%',
     backgroundColor: '#1f1f1f',
     borderRadius: 12,
@@ -157,7 +175,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
   },
-  input: {
+  input: 
+  {
     borderWidth: 1,
     borderColor: '#444',
     borderRadius: 10,
@@ -172,7 +191,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-  button: {
+  button: 
+  {
     backgroundColor: '#f8d06f',
     padding: 14,
     borderRadius: 12,
@@ -186,30 +206,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#b69c53',
   },
-  buttonText: {
+  buttonText: 
+  {
     color: '#1a1a1a',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
   },
-  guestText: {
+  guestText:
+  {
     color: '#f8d06f',
     fontSize: 15,
     textDecorationLine: 'underline',
     fontFamily: 'PixelifySans-Regular',
   },
-  signupText: {
+  signupText: 
+  {
     color: '#f8d06f',
     fontSize: 15,
     textDecorationLine: 'underline',
     marginTop: 10,
     fontFamily: 'PixelifySans-Regular',
   },
-  helpContainer: {
+  helpContainer: 
+  {
     marginTop: 40,
   },
-  helpText: {
+  helpText: 
+  {
     color: '#999',
     fontSize: 13,
     fontFamily: 'PixelifySans-Regular',
