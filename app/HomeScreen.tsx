@@ -5,12 +5,14 @@ import { useLegends } from '../hooks/useLegends';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import { getAuth } from 'firebase/auth';
 
+//The local legend catagories
 const categories =
 [
   { name: 'Historical Events' },
   { name: 'Myth' },
   { name: 'Urban Legends' }
 ];
+
 
 export default function HomeScreen() 
 {
@@ -24,6 +26,7 @@ export default function HomeScreen()
   const [displayName, setDisplayName] = useState('Guest'); 
   const slideAnim = useState(new Animated.Value(-300))[0];
 
+  //Say hi to user, cut the @login.com
   useEffect(() => 
   {
     const auth = getAuth();
@@ -38,6 +41,7 @@ export default function HomeScreen()
     }
   }, []);
 
+  //Premium user pop up
   useEffect(() => 
   {
     if (isPremium === 'true') 
@@ -96,6 +100,7 @@ export default function HomeScreen()
     router.push('/HiddenGemScreen');
   };
 
+  //Local Legends Search 
   const filteredLegends = legends.filter((legend) => 
     {
     const query = searchQuery.toLowerCase();
@@ -109,8 +114,6 @@ export default function HomeScreen()
     : [];
 
   return (
-
-    
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <ScrollView contentContainerStyle={styles.container}>
         
@@ -247,20 +250,23 @@ export default function HomeScreen()
   );
 }
 
+//Back container
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#000', // pure black background
+    backgroundColor: '#000', 
     padding: 20,
     paddingTop: 60,
   },
 
+  //Local Legends(box)
   titlebox:
   {
     width: wp('90%'),
     height: hp('10%'),
   },
 
+  //Local Legends(text)
   title: 
   {
     fontSize: 50,
@@ -274,17 +280,18 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     textShadowColor: '#f8d06f',
     textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 5, // soft yellow glow
+    textShadowRadius: 5, 
   },
+
 
   profileNsetting:
   {
     flexDirection: 'row',
     alignSelf: 'flex-end',
-    width: wp('20%'),
-    height: hp('8%'),
+    marginBottom: 20,
   },
   
+  //Welcome
   userText: 
   {
     fontSize: 20,
@@ -296,6 +303,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
+
+  //Premium
   badge: 
   {
     alignSelf: 'center',
@@ -316,7 +325,7 @@ const styles = StyleSheet.create({
     fontFamily: 'PixelifySans-Regular',
    },
 
-
+  //search box
   searchContainer: 
   {
     marginBottom: 10,
@@ -479,17 +488,17 @@ const styles = StyleSheet.create({
 
   imageBackground: 
   {
-    width: wp('100%'),
-    height: hp('30%'),
+    width: '100%',
+    height: 250,
     borderRadius: 10,
     overflow: 'hidden',
   },
   
   popupContainer: 
   {
-    position: 'absolute',
-    width: wp('30%'),
-    height: hp('50%'),
+    position: 'absolute',    
+    top: 100,
+    left: 0,
     backgroundColor: 'transperent',
     borderRadius: 12,
     padding: 10,
@@ -503,7 +512,7 @@ const styles = StyleSheet.create({
   },
   popupImage: 
   {
-    width: 80,
+    width: 100,
     height: 100,
     borderRadius: 8,
   },
@@ -511,15 +520,16 @@ const styles = StyleSheet.create({
   {
     position: 'absolute',
     zIndex: 1,
-    width: wp('50%'),
-    height: hp('10%'),
+    top: 5,
+    right: 15,
+
   },
   modalOverlay: 
   {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Dark background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', 
   },
   modalContent: 
   {
