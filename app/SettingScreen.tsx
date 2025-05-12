@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  SafeAreaView,
-  Modal,
-  TextInput,
-} from 'react-native';
+import {View,Text,TouchableOpacity,StyleSheet,Alert,SafeAreaView,Modal,TextInput,} from 'react-native';
 import { getAuth, deleteUser, updateEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import * as Notifications from 'expo-notifications';
 import { AntDesign, Feather, MaterialIcons } from '@expo/vector-icons';
@@ -16,7 +7,8 @@ import { useNavigation } from '@react-navigation/native';
 import { signOut } from 'firebase/auth';
 import { router } from 'expo-router';
 
-const SettingsScreen = () => {
+const SettingsScreen = () => 
+{
   const [bannerVisible, setBannerVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStep, setModalStep] = useState<'email' | 'password' | 'reauth-email' | 'reauth-password' | null>(null);
@@ -26,19 +18,22 @@ const SettingsScreen = () => {
   const auth = getAuth();
   const navigation = useNavigation();
 
-  const openModal = (step: typeof modalStep) => {
+  const openModal = (step: typeof modalStep) =>
+  {
     setModalStep(step);
     setInputValue('');
     setModalVisible(true);
   };
 
-  const closeModal = () => {
+  const closeModal = () => 
+  {
     setModalVisible(false);
     setModalStep(null);
     setInputValue('');
   };
 
-  const handleDeleteAccount = () => {
+  const handleDeleteAccount = () => 
+  {
     Alert.alert(
       'Are you sure?',
       'Your account will be permanently deleted.',
@@ -47,15 +42,19 @@ const SettingsScreen = () => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: async () => {
+          onPress: async () => 
+          {
             const user = auth.currentUser;
-            if (user) {
-              try {
+            if (user) 
+            {
+              try 
+              {
                 await deleteUser(user);
                 await signOut(auth);
                 Alert.alert('Sorry to see you go!', 'Your account has now been deleted.');
                 router.replace('/');
-              } catch (error) {
+              } catch (error) 
+              {
                 console.error('Error deleting user:', error);
                 Alert.alert('Error', 'Unable to delete account. Please reauthenticate.');
               }
@@ -67,45 +66,55 @@ const SettingsScreen = () => {
     );
   };
 
-  const handleCustomerSupport = () => {
+  const handleCustomerSupport = () => 
+  {
     setBannerVisible(true);
     setTimeout(() => setBannerVisible(false), 4000);
   };
 
-  const requestNotificationPermission = async () => {
+  const requestNotificationPermission = async () => 
+  {
     const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
+    if (status !== 'granted') 
+    {
       Alert.alert('Permission Denied', 'You will not receive notifications from this app.');
     }
   };
 
-  const handleModalSubmit = async () => {
+  const handleModalSubmit = async () => 
+  {
     const user = auth.currentUser;
     if (!user || !user.email) return;
 
-    try {
-      if (modalStep === 'email') {
+    try 
+    {
+      if (modalStep === 'email') 
+      {
         setTempEmail(inputValue);
         closeModal();
         openModal('reauth-email');
-      } else if (modalStep === 'reauth-email') {
+      } else if (modalStep === 'reauth-email') 
+      {
         const credential = EmailAuthProvider.credential(user.email, inputValue);
         await reauthenticateWithCredential(user, credential);
         await updateEmail(user, tempEmail);
         Alert.alert('Success', 'Your email has been updated.');
         closeModal();
-      } else if (modalStep === 'password') {
+      } else if (modalStep === 'password') 
+      {
         setTempPassword(inputValue);
         closeModal();
         openModal('reauth-password');
-      } else if (modalStep === 'reauth-password') {
+      } else if (modalStep === 'reauth-password') 
+      {
         const credential = EmailAuthProvider.credential(user.email, inputValue);
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, tempPassword);
         Alert.alert('Success', 'Your password has been updated.');
         closeModal();
       }
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Credential error:', error);
       Alert.alert('Error', 'Update failed. Please try again.');
       closeModal();
@@ -186,12 +195,14 @@ const SettingsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     backgroundColor: '#000',
     padding: 20,
   },
-  title: {
+  title: 
+  {
     fontSize: 34,
     fontWeight: 'bold',
     color: '#f8d06f',
@@ -202,7 +213,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
-  banner: {
+  banner: 
+  {
     backgroundColor: '#ff4444cc',
     padding: 12,
     borderRadius: 12,
@@ -211,13 +223,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 6,
   },
-  bannerText: {
+  bannerText: 
+  {
     color: 'white',
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     textAlign: 'center',
   },
-  card: {
+  card: 
+  {
     backgroundColor: '#111',
     borderRadius: 15,
     padding: 16,
@@ -228,15 +242,18 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  optionRow: {
+  optionRow: 
+  {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
   },
-  icon: {
+  icon: 
+  {
     marginRight: 12,
   },
-  optionText: {
+  optionText: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
@@ -244,25 +261,29 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 4,
   },
-  modalOverlay: {
+  modalOverlay: 
+  {
     flex: 1,
     justifyContent: 'center',
     backgroundColor: '#000000aa',
     padding: 24,
   },
-  modalContainer: {
+  modalContainer: 
+  {
     backgroundColor: '#222',
     borderRadius: 12,
     padding: 20,
   },
-  modalTitle: {
+  modalTitle: 
+  {
     color: '#f8d06f',
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'PixelifySans-Regular',
     marginBottom: 12,
   },
-  modalInput: {
+  modalInput: 
+  {
     backgroundColor: '#333',
     color: '#fff',
     borderRadius: 8,
@@ -270,11 +291,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     fontFamily: 'PixelifySans-Regular',
   },
-  modalButtonRow: {
+  modalButtonRow: 
+  {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  modalButton: {
+  modalButton: 
+  {
     color: '#f8d06f',
     fontWeight: 'bold',
     fontSize: 16,

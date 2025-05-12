@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  Alert,
-  StyleSheet,
-  Keyboard,
-  TouchableWithoutFeedback
-} from 'react-native';
+import {View,TextInput,Text,TouchableOpacity,Alert,StyleSheet,Keyboard,TouchableWithoutFeedback} from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { useRouter } from 'expo-router';
 import useCustomFonts from '../hooks/useCustomFont';
 
-export default function SignUpScreen() {
+export default function SignUpScreen() 
+{
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -22,8 +14,10 @@ export default function SignUpScreen() {
   const fontsLoaded = useCustomFonts();
   if (!fontsLoaded) return null;
 
-  const handleSignUp = async () => {
-    try {
+  const handleSignUp = async () => 
+  {
+    try 
+    {
       await createUserWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "Account created!");
       router.replace('/');
@@ -69,14 +63,16 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#121212',
     padding: 20,
   },
-  title: {
+  title: 
+  {
     fontSize: 35,
     color: '#fefefe',
     marginBottom: 4,
@@ -85,7 +81,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
-  logo: {
+  logo: 
+  {
     fontSize: 55,
     color: '#f8d06f',
     marginBottom: 32,
@@ -94,7 +91,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 3, height: 3 },
     textShadowRadius: 6,
   },
-  inputContainer: {
+  inputContainer: 
+  {
     width: '100%',
     backgroundColor: '#1f1f1f',
     borderRadius: 12,
@@ -107,7 +105,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
   },
-  input: {
+  input: 
+  {
     borderWidth: 1,
     borderColor: '#444',
     borderRadius: 10,
@@ -122,7 +121,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
-  button: {
+  button: 
+  {
     backgroundColor: '#f8d06f',
     padding: 14,
     borderRadius: 12,
@@ -136,14 +136,16 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#b69c53',
   },
-  buttonText: {
+  buttonText: 
+  {
     color: '#1a1a1a',
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
   },
-  backText: {
+  backText: 
+  {
     color: '#f8d06f',
     fontSize: 15,
     textDecorationLine: 'underline',

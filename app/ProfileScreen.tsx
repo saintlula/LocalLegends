@@ -1,29 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-  SafeAreaView,
-  ActivityIndicator,
-  Modal,
-  Alert,
-} from 'react-native';
+import {View,Text,StyleSheet,FlatList,TouchableOpacity,TextInput,SafeAreaView,ActivityIndicator,Modal,Alert,} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { getAuth } from 'firebase/auth';
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  collection,
-  getDocs,
-  deleteDoc,
-  updateDoc,
-} from 'firebase/firestore';
+import {getFirestore,doc,getDoc,collection,getDocs,deleteDoc,updateDoc,} from 'firebase/firestore';
 
-export default function ProfileScreen() {
+
+export default function ProfileScreen() 
+{
   const [user, setUser] = useState({ uid: '', email: '' });
   const [username, setUsername] = useState('');
   const [editingUsername, setEditingUsername] = useState(false);
@@ -37,91 +20,113 @@ export default function ProfileScreen() {
 
   const auth = getAuth();
   const db = getFirestore();
+  
 
-  useEffect(() => {
+  useEffect(() => 
+  {
     const currentUser = auth.currentUser;
-    if (currentUser) {
+    if (currentUser) 
+    {
       const email = currentUser.email || '';
       setUser({ uid: currentUser.uid, email });
 
       const defaultUsername = email.split('@')[0];
       setUsername(defaultUsername);
-
       fetchUserProfile(currentUser.uid, defaultUsername);
       fetchUserStories(currentUser.uid);
       fetchUserRatings(currentUser.uid);
     }
   }, []);
 
-  const fetchUserProfile = async (uid: string, defaultUsername: string) => {
+
+  const fetchUserProfile = async (uid: string, defaultUsername: string) => 
+    {
     const userRef = doc(db, 'users', uid);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
       const storedUsername = userSnap.data().username;
-      if (storedUsername) {
+      if (storedUsername) 
+      {
         setUsername(storedUsername);
       }
     }
   };
 
-  const fetchUserStories = async (uid: string) => {
-    try {
+
+  const fetchUserStories = async (uid: string) => 
+  {
+    try 
+    {
       const legendsRef = collection(db, 'legends');
       const snapshot = await getDocs(legendsRef);
       const userStories = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((story: any) => story.userId === uid);
       setStories(userStories);
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Error fetching stories:', error);
-    } finally {
+    } finally 
+    {
       setLoading(false);
     }
   };
 
-  const fetchUserRatings = async (uid: string) => {
-    try {
+  const fetchUserRatings = async (uid: string) => 
+  {
+    try 
+    {
       const legendsRef = collection(db, 'legends');
       const snapshot = await getDocs(legendsRef);
       let count = 0;
       snapshot.docs.forEach((doc) => {
         const reviewsRef = collection(db, 'legends', doc.id, 'reviews');
-        getDocs(reviewsRef).then((reviewSnap) => {
+        getDocs(reviewsRef).then((reviewSnap) => 
+        {
           reviewSnap.forEach((reviewDoc) => {
-            if (reviewDoc.data().userId === uid) {
+            if (reviewDoc.data().userId === uid) 
+            {
               count++;
             }
           });
           setRatingsCount(count);
         });
       });
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Error fetching ratings:', error);
     }
   };
 
-  const saveUsername = () => {
+  const saveUsername = () => 
+  {
     setEditingUsername(false);
     console.log('Saved username:', username);
   };
 
-  const deleteStory = async (id: string) => {
-    try {
+  const deleteStory = async (id: string) => 
+  {
+    try 
+    {
       await deleteDoc(doc(db, 'legends', id));
       setStories(stories.filter((story) => story.id !== id));
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Failed to delete story:', error);
     }
   };
 
-  const startEditStory = (id: string, currentTitle: string) => {
+  const startEditStory = (id: string, currentTitle: string) => 
+  {
     setEditingStoryId(id);
     setEditingStoryTitle(currentTitle);
   };
 
-  const saveEditedStory = async () => {
+  const saveEditedStory = async () => 
+  {
     if (!editingStoryId) return;
-    try {
+    try 
+    {
       const storyRef = doc(db, 'legends', editingStoryId);
       await updateDoc(storyRef, { title: editingStoryTitle });
       setStories((prev) =>
@@ -131,7 +136,8 @@ export default function ProfileScreen() {
       );
       setEditingStoryId(null);
       setEditingStoryTitle('');
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Failed to update story:', error);
     }
   };
@@ -212,7 +218,6 @@ export default function ProfileScreen() {
         )}
       </View>
 
-      {/* Manage Stories Modal */}
       <Modal
         visible={manageModalVisible}
         animationType="slide"
@@ -286,12 +291,14 @@ export default function ProfileScreen() {
 
 
 const styles = StyleSheet.create({
-  container: {
+  container: 
+  {
     flex: 1,
     backgroundColor: '#000',
     padding: 20,
   },
-  header: {
+  header: 
+  {
     fontSize: 34,
     fontWeight: 'bold',
     color: '#f8d06f',
@@ -302,7 +309,8 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 8,
   },
-  card: {
+  card: 
+  {
     backgroundColor: '#111',
     borderRadius: 15,
     padding: 16,
@@ -313,23 +321,27 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
-  label: {
+  label: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
     marginBottom: 8,
   },
-  infoText: {
+  infoText: 
+  {
     color: '#fff',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
     marginBottom: 8,
   },
-  inputRow: {
+  inputRow: 
+  {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  input: {
+  input: 
+  {
     flex: 1,
     borderBottomWidth: 1,
     borderBottomColor: '#f8d06f',
@@ -338,16 +350,19 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     marginRight: 10,
   },
-  iconButton: {
+  iconButton: 
+  {
     padding: 4,
   },
-  buttonRow: {
+  buttonRow: 
+  {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 10,
     marginBottom: 20,
   },
-  actionButton: {
+  actionButton: 
+  {
     flex: 1,
     padding: 12,
     backgroundColor: '#111',
@@ -359,40 +374,46 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
-  subscriptionText: {
+  subscriptionText: 
+  {
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
     fontSize: 14,
   },
-  storyItem: {
+  storyItem: 
+  {
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#222',
   },
-  storyTitle: {
+  storyTitle: 
+  {
     color: '#f8d06f',
     fontSize: 16,
     fontFamily: 'PixelifySans-Regular',
   },
-  storyCategory: {
+  storyCategory: 
+  {
     color: '#aaa',
     fontSize: 14,
     fontFamily: 'PixelifySans-Regular',
   },
-  viewAll: {
+  viewAll: 
+  {
     color: '#f8d06f',
     fontFamily: 'PixelifySans-Regular',
     marginTop: 10,
     textAlign: 'center',
   },
-
-  modalBackground: {
+  modalBackground: 
+  {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.85)',
     justifyContent: 'center',
     padding: 20,
   },
-  modalContainer: {
+  modalContainer: 
+  {
     backgroundColor: '#111',
     borderRadius: 15,
     padding: 20,

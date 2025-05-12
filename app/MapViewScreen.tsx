@@ -5,17 +5,21 @@ import { useRouter } from 'expo-router';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
-export default function MapViewScreen() {
+export default function MapViewScreen() 
+{
   const [legends, setLegends] = useState<any[]>([]);
   const [initialRegion, setInitialRegion] = useState<Region | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
+  useEffect(() => 
+  {
     fetchLegends();
   }, []);
 
-  const fetchLegends = async () => {
-    try {
+  const fetchLegends = async () => 
+  {
+    try 
+    {
       const querySnapshot = await getDocs(collection(db, 'legends'));
       const fetchedLegends: any[] = [];
       querySnapshot.forEach((doc) => {
@@ -23,7 +27,8 @@ export default function MapViewScreen() {
       });
       setLegends(fetchedLegends);
 
-      if (fetchedLegends.length > 0) {
+      if (fetchedLegends.length > 0) 
+      {
         const first = fetchedLegends[0].location;
         setInitialRegion({
           latitude: first.latitude,
@@ -32,12 +37,14 @@ export default function MapViewScreen() {
           longitudeDelta: 0.1,
         });
       }
-    } catch (error) {
+    } catch (error) 
+    {
       console.error('Error fetching legends:', error);
     }
   };
 
-  const handleMarkerPress = (legendId: string) => {
+  const handleMarkerPress = (legendId: string) => 
+  {
     router.push({
       pathname: '/StoryDetails',
       params: { id: legendId },
@@ -74,8 +81,12 @@ export default function MapViewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  backButton: {
+  container: 
+  { 
+    flex: 1 
+  },
+  backButton: 
+  {
     position: 'absolute',
     top: 40,
     left: 20,
@@ -88,12 +99,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     shadowRadius: 8,
   },
-  backIcon: {
+  backIcon: 
+  {
     textShadowColor: '#f8d06f',
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 6,
   },
-  backButtonText: {
+  backButtonText: 
+  {
     color: '#3b6e82',
     fontWeight: 'bold',
   },
