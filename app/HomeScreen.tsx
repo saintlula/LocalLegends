@@ -236,7 +236,10 @@ export default function HomeScreen()
                   <TouchableOpacity
                     key={legend.id}
                     style={styles.modalStoryItem}
-                    onPress={() => handleStoryClick(legend.id)}
+                    onPress={() => {
+                      handleCategoryClose(); 
+                      handleStoryClick(legend.id);
+                    }}
                   >
                     <Text style={styles.modalStoryTitle}>{legend.title}</Text>
                   </TouchableOpacity>

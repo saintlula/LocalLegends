@@ -92,7 +92,7 @@ const StoryAddScreen = () =>
         createdAt: new Date(),
       });
 
-      alert('Story submitted for moderation!');
+      alert('Story was submitted! You have bypassed moderation due to this being a prototype :)');
       navigation.goBack();
     } catch (error) {
       console.error('Error submitting story:', error);
